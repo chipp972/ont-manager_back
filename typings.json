@@ -1,0 +1,18 @@
+{
+  "name": "ont-manager_back",
+  "dependencies": {
+    "sequelize": "registry:npm/sequelize#3.0.0+20160604152601"
+  },
+  "ambientDependencies": {
+    "es6-shim": "github:DefinitelyTyped/DefinitelyTyped/es6-shim/es6-shim.d.ts#7de6c3dd94feaeb21f20054b9f30d5dabc5efabd"
+  },
+  "globalDependencies": {
+    "express": "registry:dt/express#4.0.0+20160317120654",
+    "express-serve-static-core": "registry:dt/express-serve-static-core#0.0.0+20160602151406",
+    "mime": "registry:dt/mime#0.0.0+20160316155526",
+    "mocha-node": "registry:dt/mocha-node#2.2.5+20160317120654",
+    "mysql": "registry:dt/mysql#0.0.0+20160316155526",
+    "node": "registry:env/node#4.0.0+20160507210304",
+    "serve-static": "registry:dt/serve-static#0.0.0+20160501131543"
+  }
+}

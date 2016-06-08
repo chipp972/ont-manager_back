@@ -1,0 +1,41 @@
+{
+  "name": "ont-manager_back",
+  "version": "1.0.0",
+  "description": "Restful API for back-end requests about ONT stock manager",
+  "main": "dist/server.js",
+  "scripts": {
+    "postinstall": "typings install",
+    "build": "tsc && node dist/scripts/app_config.js",
+    "prestart": "npm run build",
+    "start": "nodemon dist/app/server.js",
+    "test": "sh scripts/start_tests.sh",
+    "lint": "tslint -c tslint.json app/**/*.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chipp972/ont-manager_back.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "private": "true",
+  "bugs": {
+    "url": "https://github.com/chipp972/ont-manager_back/issues"
+  },
+  "homepage": "https://github.com/chipp972/ont-manager_back#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3",
+    "nodemon": "^1.9.2",
+    "ts-loader": "^0.8.2",
+    "tslint": "^3.10.2",
+    "typescript": "^1.8.10",
+    "typings": "^1.0.4",
+    "webpack": "^1.13.1"
+  },
+  "dependencies": {
+    "express": "^4.13.4",
+    "mysql": "^2.10.2",
+    "sequelize": "^3.23.3"
+  }
+}

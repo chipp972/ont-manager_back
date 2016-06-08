@@ -1,0 +1,19 @@
+[
+  {
+    "name": "mongo",
+    "host": "mongo",
+    "port": 27017,
+    "user": "nico",
+    "pass": "covage",
+    "database": "test"
+  },
+  {
+    "database": "mydb",
+    "host": "172.16.128.33",
+    "password": "vitamCOVAGE2013",
+    "name": "ont_db",
+    "port": 3306,
+    "type": "mysql",
+    "user": "root"
+  }
+]
