@@ -1,18 +1,35 @@
-import * as Sequelize from 'sequelize'
-import {getDatabaseConfig} from 'app/config'
+import {DatabaseConfig} from 'app/config/config.d.ts'
+import {DatabaseObject} from './model.d.ts'
+import * as mongoose from 'mongoose'
 
-async function getOntList (): Promise<void> {
-  let config = await getDatabaseConfig('ont_db')
-  let uri = `${config.type}:${config.user}:${config.password}
-             @${config.host}:${config.port}/${config.database}`
-  let sequelize = new Sequelize(uri)
+// models
+import {User} from './user'
 
-  let Ont = sequelize.define('ont', {
-    fsan: { field: 'fsan', type: Sequelize.STRING },
-    model: { field: 'model', type: Sequelize.STRING },
-    serial: { field: 'serial', type: Sequelize.STRING },
-    state: { field: 'state', type: Sequelize.STRING }
+export function init (config: DatabaseConfig): Promise<DatabaseObject> {
+  let uri: string
+  uri = `${config.type}://${config.host}:${config.port}/${config.database}`
+
+  return new Promise<DatabaseObject>((resolve, reject) => {
+    mongoose.connect(uri, config)
+    mongoose.connection.on('connected', () => {
+      resolve({
+        connection: mongoose.connection,
+        user: User
+      })
+    })
+
+    mongoose.connection.on('error', (err) => {
+      reject(err)
+    })
+
+    mongoose.connection.on('disconnected', () => {
+      console.log('Mongoose default connection disconnected')
+    })
+
+    process.on('SIGINT', () => {
+      mongoose.connection.close(() => {
+        process.exit(0)
+      })
+    })
   })
 }
-
-getOntList()

@@ -30,12 +30,12 @@
     "ts-loader": "^0.8.2",
     "tslint": "^3.10.2",
     "typescript": "^1.8.10",
-    "typings": "^1.0.4",
-    "webpack": "^1.13.1"
+    "typings": "^1.0.4"
   },
   "dependencies": {
+    "body-parser": "^1.15.1",
     "express": "^4.13.4",
-    "mysql": "^2.10.2",
-    "sequelize": "^3.23.3"
+    "mongoose": "^4.4.20",
+    "multer": "^1.1.0"
   }
 }

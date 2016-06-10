@@ -1,29 +1,32 @@
-import * as express from 'express'
-import {getServerConfig} from 'app/config'
+import {getServerConfig, getDatabaseConfig} from './config'
 
-async function startServer(): Promise<void> {
+import * as express from 'express'
+import * as model from './model'
+import {generateRoutes} from './route'
+
+async function initServer(): Promise<void> {
   try {
-    let config = await getServerConfig('api')
+    let servConf = await getServerConfig('api')
+    let dbConf = await getDatabaseConfig('test')
+
+    let database = await model.init(dbConf)
     let app = express()
 
-    app.get('/', (request, response) => {
-      response.send('Hello World!')
+    app.use(generateRoutes(app, database))
+
+    let server = app.listen(servConf.port, servConf.host, () => {
+      console.log(`App listening on http://${servConf.host}:${servConf.port}`)
     })
 
-    app.get('/ont', (request, response) => {
-      response.send('nono')
+    server.on('close', () => {
+      database.connection.close()
+      console.log('Server is down')
     })
 
-    app.get('/ont/:id', (request, response) => {
-      response.send('haha' + request.params.id)
-    })
-
-    app.listen(config.port, config.host, () => {
-      console.log(`App listening on http://${config.host}:${config.port}`)
-    })
   } catch (err) {
+    console.log(err)
     throw err
   }
 }
 
-startServer()
+initServer()

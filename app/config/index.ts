@@ -3,6 +3,7 @@
  */
 import * as fs from 'fs'
 import * as path from 'path'
+import {ServerConfig, DatabaseConfig} from './config.d.ts'
 
 const configpath = 'app/config'
 // or __dirname if find a solution to put config files in dist/app/config/
@@ -10,24 +11,6 @@ const configpath = 'app/config'
 const FILES = {
   database: 'db',
   server: 'server'
-}
-
-interface Config {
-  name: string
-  user?: string
-  password?: string
-}
-
-interface ServerConfig extends Config {
-  host: string
-  port: number
-}
-
-interface DatabaseConfig extends Config {
-  host: string
-  port: number
-  database: string
-  type: string
 }
 
 export function getServerConfig (name: string): Promise<ServerConfig> {
@@ -55,7 +38,7 @@ function getConfigByName (file: string, name: string): Promise<any> {
   })
 }
 
-function getJSON (filepath: string): Promise<Array<Config>> {
+function getJSON (filepath: string): Promise<Array<any>> {
   return new Promise((resolve, reject) => {
     fs.readFile(filepath, (err, buffer) => {
       if (err) {

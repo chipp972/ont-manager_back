@@ -1,17 +1,18 @@
 [
   {
-    "name": "mongo",
-    "host": "mongo",
+    "name": "test",
+    "host": "172.16.128.101",
     "port": 27017,
     "user": "nico",
-    "pass": "covage",
-    "database": "test"
+    "password": "covage",
+    "database": "test",
+    "type": "mongodb"
   },
   {
+    "name": "ont_db",
     "database": "mydb",
     "host": "172.16.128.33",
     "password": "vitamCOVAGE2013",
-    "name": "ont_db",
     "port": 3306,
     "type": "mysql",
     "user": "root"
