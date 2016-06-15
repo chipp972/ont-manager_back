@@ -35,3 +35,6 @@ typings
 
 # generated js
 dist
+
+.remote-sync.json
+log

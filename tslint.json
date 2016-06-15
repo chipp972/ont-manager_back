@@ -55,7 +55,7 @@
       "no-debugger": true,
       "no-empty": true,
       "no-eval": true,
-      "no-invalid-this": [true, "check-function-in-method"],
+      "no-invalid-this": false,
       "no-null-keyword": true,
       "no-shadowed-variable": true,
       "no-string-literal": false,

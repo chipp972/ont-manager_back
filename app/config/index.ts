@@ -39,7 +39,7 @@ function getConfigByName (file: string, name: string): Promise<any> {
 }
 
 function getJSON (filepath: string): Promise<Array<any>> {
-  return new Promise((resolve, reject) => {
+  return new Promise<Array<any>>((resolve, reject) => {
     fs.readFile(filepath, (err, buffer) => {
       if (err) {
         reject(err)

@@ -2,13 +2,13 @@
   "name": "ont-manager_back",
   "version": "1.0.0",
   "description": "Restful API for back-end requests about ONT stock manager",
-  "main": "dist/server.js",
+  "main": "dist/app.js",
   "scripts": {
     "postinstall": "typings install",
     "build": "tsc && node dist/scripts/app_config.js",
     "prestart": "npm run build",
-    "start": "nodemon dist/app/server.js",
-    "test": "sh scripts/start_tests.sh",
+    "start": "nodemon dist/app/app.js",
+    "test": "tsc && sh scripts/start_tests.sh",
     "lint": "tslint -c tslint.json app/**/*.ts"
   },
   "repository": {
@@ -27,15 +27,20 @@
     "chai": "^3.5.0",
     "mocha": "^2.5.3",
     "nodemon": "^1.9.2",
+    "supertest": "^1.2.0",
+    "supertest-as-promised": "^3.1.0",
     "ts-loader": "^0.8.2",
     "tslint": "^3.10.2",
     "typescript": "^1.8.10",
     "typings": "^1.0.4"
   },
   "dependencies": {
+    "bcryptjs": "^2.3.0",
     "body-parser": "^1.15.1",
     "express": "^4.13.4",
+    "express-winston": "^1.4.1",
     "mongoose": "^4.4.20",
-    "multer": "^1.1.0"
+    "multer": "^1.1.0",
+    "winston": "^2.2.0"
   }
 }

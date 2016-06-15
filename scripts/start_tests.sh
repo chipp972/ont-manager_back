@@ -1,5 +1,7 @@
 #!/bin/sh
 
+cd $(dirname $0)/..
+
 if [ ! -e node_modules/.bin/mocha ]
 then
   echo "no mocha detected !"

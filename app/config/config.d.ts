@@ -7,10 +7,11 @@ interface Config {
 export interface ServerConfig extends Config {
   host: string
   port: number
+  logfile: string
 }
 
 declare enum DatabaseType {
-  'mysql', 'mongo', 'sqlite'
+  'mysql', 'mongodb', 'sqlite'
 }
 
 export interface DatabaseConfig extends Config {

@@ -1,20 +1,29 @@
 [
   {
+    "name": "dev",
+    "host": "172.16.128.101",
+    "port": 27017,
+    "user": "nico",
+    "password": "covage",
+    "database": "dev_stock_manager",
+    "type": "mongodb"
+  },
+  {
+    "name": "prod",
+    "host": "172.16.128.101",
+    "port": 27017,
+    "user": "nico",
+    "password": "covage",
+    "database": "stock_manager",
+    "type": "mongodb"
+  },
+  {
     "name": "test",
     "host": "172.16.128.101",
     "port": 27017,
     "user": "nico",
     "password": "covage",
-    "database": "test",
+    "database": "test_stock_manager",
     "type": "mongodb"
-  },
-  {
-    "name": "ont_db",
-    "database": "mydb",
-    "host": "172.16.128.33",
-    "password": "vitamCOVAGE2013",
-    "port": 3306,
-    "type": "mysql",
-    "user": "root"
   }
 ]
