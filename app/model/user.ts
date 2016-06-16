@@ -1,15 +1,26 @@
-import * as mongoose from 'mongoose'
+/**
+ * List of users of the application
+ */
+import {Schema, model} from 'mongoose'
 import * as bcrypt from 'bcryptjs'
-import {RightSchema} from './right'
+import * as autoIncr from 'mongoose-auto-increment'
 
 const SALT = 10
+const modelName = 'User'
 
-export let UserSchema = new mongoose.Schema({
-  email: { index: { unique: true}, required: true, type: String },
-  login: { index: { unique: true}, required: true, type: String },
-  password: { required: true, type: String },
-  right: RightSchema
+export let UserSchema = new Schema({
+  admin: { default: false, type: Boolean },
+  email: {
+    index: { unique: true},
+    lowercase: true,
+    required: true,
+    trim: true,
+    type: String
+  },
+  password: { required: true, type: String }
 })
+
+UserSchema.plugin(autoIncr.plugin, modelName)
 
 UserSchema.pre('save', function (next: Function): void {
   let user = this
@@ -37,4 +48,4 @@ UserSchema.method('comparePassword',
     })
 })
 
-export let User = mongoose.model('User', UserSchema)
+export let User = model(modelName, UserSchema)

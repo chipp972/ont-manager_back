@@ -27,11 +27,21 @@ export let initServer =
       logger.debug(`${req.ip} -> ${req.method} ${req.url}`)
     })
 
-    server.on('error', (err) => {
-      logger.error(err)
+    server.on('error', (err: Error) => {
+      logger.error(`server error: ${err}`)
     })
 
-    process.on('SIGINT', () => {
+    database.connection.on('error', (err: Error) => {
+      logger.error(`database error: ${err}`)
+    })
+
+    database.connection.once('disconnected', () => {
+      logger.debug('database connection: ended')
+      logger.debug('server is down')
+      process.exit(0)
+    })
+
+    process.once('SIGINT', () => {
       logger.info('Server is down')
       database.connection.close(() => {
         process.exit(0)

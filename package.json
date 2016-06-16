@@ -5,8 +5,7 @@
   "main": "dist/app.js",
   "scripts": {
     "postinstall": "typings install",
-    "build": "tsc && node dist/scripts/app_config.js",
-    "prestart": "npm run build",
+    "prestart": "tsc && node dist/scripts/app_config.js",
     "start": "nodemon dist/app/app.js",
     "test": "tsc && sh scripts/start_tests.sh",
     "lint": "tslint -c tslint.json app/**/*.ts"
@@ -40,6 +39,7 @@
     "express": "^4.13.4",
     "express-winston": "^1.4.1",
     "mongoose": "^4.4.20",
+    "mongoose-auto-increment": "^5.0.1",
     "multer": "^1.1.0",
     "winston": "^2.2.0"
   }

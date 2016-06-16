@@ -2,42 +2,44 @@ import {DatabaseConfig} from 'app/config/config.d.ts'
 import {DatabaseObject} from './model.d.ts'
 
 import * as mongoose from 'mongoose'
+import * as autoIncr from 'mongoose-auto-increment'
 import {LoggerInstance} from 'winston'
 
-// models
-import {Dsp} from './dsp'
-import {Equipment} from './equipment'
-import {EquipmentType} from './equipment_type'
-import {Order} from './order'
-import {Society} from './society'
-import {User} from './user'
+// mongoose plugins initialization
+autoIncr.initialize(mongoose.connection) // auto increment
 
-export let initDatabase =
- function (config: DatabaseConfig, logger: LoggerInstance): Promise<DatabaseObject> {
+// models
+import {User} from './user'
+import {Category} from './category'
+import {SubCategory} from './sub_category'
+import {Company} from './company'
+import {Place} from './place'
+import {Order} from './order'
+
+export function initDatabase (config: DatabaseConfig, logger: LoggerInstance):
+Promise<DatabaseObject> {
   let uri: string
   uri = `${config.type}://${config.host}:${config.port}/${config.database}`
 
   return new Promise<DatabaseObject>((resolve, reject) => {
     mongoose.connect(uri, config)
-    mongoose.connection.on('connected', () => {
+    mongoose.connection.once('connected', () => {
+      logger.info('database connection: success')
+
       resolve({
+        category: Category,
+        company: Company,
         connection: mongoose.connection,
-        dsp: Dsp,
-        equipment: Equipment,
-        equipmentType: EquipmentType,
         order: Order,
-        society: Society,
+        place: Place,
+        subCategory: SubCategory,
         user: User
       })
     })
 
-    mongoose.connection.on('error', (err) => {
-      logger.error(`mongoose error: ${err}`)
+    mongoose.connection.once('error', (err) => {
+      logger.error(`database error: ${err}`)
       reject(err)
-    })
-
-    mongoose.connection.on('disconnected', () => {
-      logger.info(`mongoose disconnected`)
     })
   })
 }
