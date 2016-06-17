@@ -26,15 +26,6 @@ Promise<DatabaseObject> {
     mongoose.connection.once('connected', () => {
       logger.info('database connection: success')
 
-      // method to find all stock from a place at a certain date
-      // put in the databaseObject ?
-      // function stockState (place: string, date?: Date): void {
-      //   // find place id
-      //   let placeId: number
-      //   Order.find({ placeIdSource: placeId })
-      //   Order.find({ placeIdDestination: placeId })
-      // }
-
       resolve({
         category: Category,
         company: Company,

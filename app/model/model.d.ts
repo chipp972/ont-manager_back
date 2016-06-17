@@ -64,7 +64,6 @@ export interface User {
 
 export interface Order {
   _id: number
-  name: string
   date: Date
   file?: Array<File>,
   placeIdSource?: number

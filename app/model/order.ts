@@ -6,7 +6,7 @@ import {User} from './user'
 const modelName = 'Order'
 
 export let OrderSchema = new mongoose.Schema({
-  date: { default: Date.now, type: Date },
+  date: { default: new Date(), type: Date },
   file: [{
     contentType: { required: true, type: String},
     data: { required: true, type: Buffer},
@@ -31,17 +31,22 @@ OrderSchema.path('userId').validate((value, respond) => {
   })
 }, `userId doesn\'t correspond to any document in User`)
 
-// validate there is at least placeIdSource or placeIdDestination
 OrderSchema.pre('save', function (next: Function): void {
   let order = this
+
+  // validate there is at least placeIdSource or placeIdDestination
   if (! (order.placeIdSource || order.placeIdDestination)) {
     next(new Error('Need at least a source or a destination place'))
   } else {
+    // validate stock
+    // if dest only: no problem -> we get stocks from nowhere
+    // if source only: no problem -> we put stock in prod
+    // if source and dest problem -> stock transfer so we must verify each stock
+    // exists and the quantity asked is lower or equal to the quantity
+    // of the stock
     next()
   }
 })
-
-// pre delete hook to verify user ?
 
 OrderSchema.plugin(autoIncr.plugin, modelName)
 export let Order = mongoose.model('Order', OrderSchema)

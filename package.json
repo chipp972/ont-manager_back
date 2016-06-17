@@ -1,5 +1,5 @@
 {
-  "name": "ont-manager_back",
+  "name": "stock-manager_back",
   "version": "1.0.0",
   "description": "Restful API for back-end requests about ONT stock manager",
   "main": "dist/app.js",
