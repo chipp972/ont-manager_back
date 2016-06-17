@@ -3,7 +3,7 @@ import {Express, Router} from 'express'
 import * as bodyParser from 'body-parser'
 import * as multer from 'multer'
 
-export function generateRoutes(app: Express, model: DatabaseObject): Router {
+export function getModelRoutes(app: Express, model: DatabaseObject): Router {
   app.use(bodyParser.json())
   app.use(bodyParser.urlencoded({ extended: true }))
 
@@ -33,7 +33,7 @@ export function generateRoutes(app: Express, model: DatabaseObject): Router {
         .set('Access-Control-Allow-Origin', '*')
         .json(objList)
       })
-      .catch((err) => response.status(404).send(err))
+      .catch(err => response.status(404).send(err))
     } else {
       response.status(404).send(`no ${name} model`)
     }
@@ -42,20 +42,22 @@ export function generateRoutes(app: Express, model: DatabaseObject): Router {
     // note : the field name must be 'files'
     let name = request.params['model']
     let obj = new model[name](request.body)
-    // TODO : handle file upload
+
     if (!obj) {
       response.status(404).send(`no ${name} model`)
     } else {
       obj.save()
       .then((dbObj) => {
-        let uri = `/${name}/${dbObj.id}`
+        let uri = `http://${request.headers['host']}/${name}/${dbObj.id}`
+
         response
         .status(201)
         .location(uri)
         .contentType('application/json')
         .set('Access-Control-Allow-Origin', '*')
+        .json(dbObj)
       })
-      .catch((err) => response.status(422).send('Validation failed'))
+      .catch(err => response.status(500).send(err))
     }
   })
 
@@ -63,7 +65,8 @@ export function generateRoutes(app: Express, model: DatabaseObject): Router {
   .get((request, response, next) => { // get a specific document
     let name = request.params['model']
     let id = request.params['id']
-    model[name].findOne({ 'id': id })
+
+    model[name].findById(id)
     .then((obj) => {
       response
       .status(200)
@@ -71,20 +74,43 @@ export function generateRoutes(app: Express, model: DatabaseObject): Router {
       .set('Access-Control-Allow-Origin', '*')
       .json(obj)
     })
-    .catch((err) => response.status(404).send(err))
+    .catch(err => response.status(404).send(err))
   })
   .put((request, response, next) => { // update the model
     let name = request.params['model']
     let id = request.params['id']
-    // 200 if ok
-    response.status(404).send('not implemented')
+    let updatedObj = request.body // accepts only json
+
+    // update the obj in the database
+    model[name].findById(id)
+    .then((obj) => {
+      // update object
+      for (let prop in obj) {
+        if (updatedObj.hasOwnProperty(prop)) {
+          obj[prop] = updatedObj[prop]
+        }
+      }
+      // save the new object in the database and send it in the response
+      obj.save()
+      .then((newObj) => {
+        response
+        .status(200)
+        .contentType('application/json')
+        .set('Access-Control-Allow-Origin', '*')
+        .json(newObj)
+      })
+      .catch(err => response.status(500).send(err))
+    })
+    .catch(err => response.status(404).send(err))
   })
   .delete((request, response, next) => { // delete the model
-    response.status(204)
-    // 404 if not good or 403 if forbidden
-  })
+    let name = request.params['model']
+    let id = request.params['id']
 
-  // authentification routes
+    model[name].remove({ '_id': id })
+    .then(() => response.status(204).send())
+    .catch(err => response.status(500).send(err))
+  })
 
   return router
 }

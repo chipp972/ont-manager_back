@@ -1,14 +1,15 @@
 /**
  * List of users of the application
  */
-import {Schema, model} from 'mongoose'
+import * as mongoose from 'mongoose'
 import * as bcrypt from 'bcryptjs'
 import * as autoIncr from 'mongoose-auto-increment'
+import {Order} from './order'
 
 const SALT = 10
 const modelName = 'User'
 
-export let UserSchema = new Schema({
+export let UserSchema = new mongoose.Schema({
   admin: { default: false, type: Boolean },
   email: {
     index: { unique: true},
@@ -20,8 +21,7 @@ export let UserSchema = new Schema({
   password: { required: true, type: String }
 })
 
-UserSchema.plugin(autoIncr.plugin, modelName)
-
+// hashing password
 UserSchema.pre('save', function (next: Function): void {
   let user = this
 
@@ -40,12 +40,20 @@ UserSchema.pre('save', function (next: Function): void {
   })
 })
 
-UserSchema.method('comparePassword',
+// password comparison
+UserSchema['methods'].comparePassword =
   function (candidate: string, callback: Function): any {
     bcrypt.compare(candidate, this.password, (err, isMatch) => {
       if (err) { return callback(err) }
       callback(undefined, isMatch)
     })
+}
+
+// cascade delete of orders
+UserSchema.pre('remove', function (next: Function): void {
+  Order.remove({ userId: this._id }).exec()
+  next()
 })
 
-export let User = model(modelName, UserSchema)
+UserSchema.plugin(autoIncr.plugin, modelName)
+export let User = mongoose.model(modelName, UserSchema)

@@ -3,13 +3,13 @@
  */
 import {model, Schema} from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
-import {CategorySchema} from './category'
+import {Category} from './category'
 
 const modelName = 'SubCategory'
 
 export let SubCategorySchema = new Schema({
-  category: {
-    ref: CategorySchema,
+  categoryId: {
+    ref: 'Category',
     required: true,
     type: Number
   },
@@ -22,6 +22,17 @@ export let SubCategorySchema = new Schema({
     type: String
   }
 })
+
+// validate categoryId
+SubCategorySchema.path('categoryId').validate((value, respond) => {
+  Category.findOne({ _id: value }, (err, document) => {
+    if (err || ! document) {
+      respond(false)
+    } else {
+      respond(true)
+    }
+  })
+}, `categoryId doesn\'t correspond to any document in Category`)
 
 SubCategorySchema.plugin(autoIncr.plugin, modelName)
 export let SubCategory = model(modelName, SubCategorySchema)

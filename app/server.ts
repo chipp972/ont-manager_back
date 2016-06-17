@@ -3,7 +3,7 @@ import {getServerConfig, getDatabaseConfig} from './config'
 import * as express from 'express'
 import {getLogger} from './logger'
 import {initDatabase} from './model'
-import {generateRoutes} from './routes'
+import {generateRoutes} from './route'
 
 export let initServer =
   async function (sconf?: string, dconf?: string): Promise<express.Express> {

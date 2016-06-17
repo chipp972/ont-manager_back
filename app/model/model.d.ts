@@ -9,59 +9,50 @@ export interface DatabaseObject {
   company: mongoose.Model<mongoose.Document>
   order: mongoose.Model<mongoose.Document>
   place: mongoose.Model<mongoose.Document>
-  subCategory: mongoose.Model<mongoose.Document>
+  sub_category: mongoose.Model<mongoose.Document>
   user: mongoose.Model<mongoose.Document>
 }
 
 export interface Category {
   _id: number
   name: string
+  description?: string
 }
 
 export interface SubCategory {
   _id: number
   name: string
   categoryId: number
+  description?: string
 }
 
 export interface Stock {
   categoryId: number
   subCategoryId?: number
   quantity: number
+  unitPrice: number
+  description?: string
 }
 
 export interface File {
+  name: string
   contentType: string
   data: Buffer
   description?: string
-  name: string
 }
 
 export interface Company {
   _id: number
   name: string
-  detail: string
-}
-
-export interface Order {
-  _id: number
-  name: string
-  companyId: number
-  date: Date
-  file: Array<File>,
-  placeIdSource: number
-  placeIdDestination: number
-  reference: string
-  stock: Array<Stock>
-  userId: number
+  description?: string
 }
 
 export interface Place {
   _id: number
   name: string
+  companyId?: number
   address?: string
-  detail?: string
-  currentStock?: Array<Stock>
+  description?: string
 }
 
 export interface User {
@@ -69,4 +60,16 @@ export interface User {
   mail: string
   password: string
   admin: boolean
+}
+
+export interface Order {
+  _id: number
+  name: string
+  date: Date
+  file?: Array<File>,
+  placeIdSource?: number
+  placeIdDestination: number
+  reference: string
+  stock: Array<Stock>
+  userId: number
 }
