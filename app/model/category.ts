@@ -3,6 +3,7 @@
  */
 import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
+import {Order} from './order'
 
 const modelName = 'Category'
 
@@ -21,6 +22,8 @@ export let CategorySchema = new mongoose.Schema({
 // Plugins
 CategorySchema.plugin(autoIncr.plugin, modelName)
 export let Category = mongoose.model(modelName, CategorySchema)
+
+// TODO verif pas de recursivité
 
 // validate subCategoryId
 CategorySchema.path('subCategoryId').validate((value, next) => {
@@ -42,8 +45,12 @@ CategorySchema.path('subCategoryId').validate((value, next) => {
 }, 'subCategoryId doesn\'t correspond to any document in Category')
 
 // cascade delete of stock in orders
-// CategorySchema.pre('remove', function (next: Function): void {
-//   Order.find()
-//   Order.remove({ categoryId: this._id }).exec()
-//   next()
-// })
+CategorySchema.pre('remove', function (next: Function): void {
+  Order.find({}).exec()
+  .then((orderList) => {
+    // for (order of orderList) {
+    //
+    // }
+    next()
+  })
+})

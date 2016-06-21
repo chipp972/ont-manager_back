@@ -3,11 +3,12 @@ import * as autoIncr from 'mongoose-auto-increment'
 import {StockSchema} from './stock'
 import {User} from './user'
 import {Place} from './place'
+import {getStockState, hasEnoughStock} from './utils'
 
 const modelName = 'Order'
 
 export let OrderSchema = new mongoose.Schema({
-  date: { default: new Date(), type: Date },
+  date: Date,
   file: [{
     contentType: { required: true, type: String},
     data: { required: true, type: Buffer},
@@ -31,34 +32,24 @@ OrderSchema.pre('save', function (next: Function): void {
 
   Place.findOne({ _id: order.placeIdSource }).exec()
   .then((sourcePlace) => {
-    let errMsg2 = 'Not enough stock in source place'
     if (sourcePlace.get('internalStock')) { // verification needed
+      let errMsg2 = 'Not enough stock in source place'
+      let placeId = sourcePlace.get('_id')
 
-      // find stock state
-      Order.find({
-        date: { $lt: order.date },
-        placeIdDestination: sourcePlace.get('_id')
-      }).exec()
-      .then((orderList) => {
-        if (! orderList) {
-          next(new Error(errMsg2))
-        } else {
-          // stock inputs
-          for (let currOrder of orderList) {
-            for (let stock of currOrder.get('stock')) {
-              console.log(stock)
-            }
-          }
+      if (! order.date) {
+        order.date = new Date()
+      }
+
+      getStockState(placeId, order.date)
+      .then((stockState) => {
+        console.log(stockState)
+        if (hasEnoughStock(stockState, order.stock)) {
           next()
+        } else {
+          next(new Error(errMsg2))
         }
-      }, err2 => next(new Error(errMsg2)))
+      })
 
-      // let stock = getStockState(sourcePlace._id)
-      // if (hasEnough(order.stock, stock)) {
-      //   next()
-      // } else {
-      //   next(new Error(errMsg2))
-      // }
     } else {
       next() // no need for verification since the source is external
     }

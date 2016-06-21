@@ -57,7 +57,7 @@ export function getModelRoutes(app: Express, model: DatabaseObject): Router {
         .set('Access-Control-Allow-Origin', '*')
         .json(dbObj)
       })
-      .catch(err => response.status(500).send(err))
+      .catch(err => response.status(403).send(err))
     }
   })
 
