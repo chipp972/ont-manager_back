@@ -2,6 +2,7 @@ import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
 import {StockSchema} from './stock'
 import {User} from './user'
+import {Place} from './place'
 
 const modelName = 'Order'
 
@@ -13,40 +14,80 @@ export let OrderSchema = new mongoose.Schema({
     description: String,
     name: { lowercase: true, required: true, trim: true, type: String}
   }],
-  placeIdDestination: { ref: 'Place', type: Number },
-  placeIdSource: { ref: 'Place', type: Number },
+  placeIdDestination: { ref: 'Place', required: true, type: Number },
+  placeIdSource: { ref: 'Place', required: true, type: Number },
   reference: { index: { unique: true }, required: true, type: String },
-  stock: [{ required: true, type: StockSchema }],
+  stock: [StockSchema],
   userId: { ref: 'User', required: true, type: Number }
 })
 
-// validate userId
-OrderSchema.path('userId').validate((value, respond) => {
-  User.findOne({ _id: value }, (err, document) => {
-    if (err || ! document) {
-      respond(false)
-    } else {
-      respond(true)
-    }
-  })
-}, `userId doesn\'t correspond to any document in User`)
+// Plugins
+OrderSchema.plugin(autoIncr.plugin, modelName)
+export let Order = mongoose.model('Order', OrderSchema)
 
+// check if the stock required is present in the source
 OrderSchema.pre('save', function (next: Function): void {
   let order = this
 
-  // validate there is at least placeIdSource or placeIdDestination
-  if (! (order.placeIdSource || order.placeIdDestination)) {
-    next(new Error('Need at least a source or a destination place'))
-  } else {
-    // validate stock
-    // if dest only: no problem -> we get stocks from nowhere
-    // if source only: no problem -> we put stock in prod
-    // if source and dest problem -> stock transfer so we must verify each stock
-    // exists and the quantity asked is lower or equal to the quantity
-    // of the stock
-    next()
-  }
+  Place.findOne({ _id: order.placeIdSource }).exec()
+  .then((sourcePlace) => {
+    let errMsg2 = 'Not enough stock in source place'
+    if (sourcePlace.get('internalStock')) { // verification needed
+
+      // find stock state
+      Order.find({
+        date: { $lt: order.date },
+        placeIdDestination: sourcePlace.get('_id')
+      }).exec()
+      .then((orderList) => {
+        if (! orderList) {
+          next(new Error(errMsg2))
+        } else {
+          // stock inputs
+          for (let currOrder of orderList) {
+            for (let stock of currOrder.get('stock')) {
+              console.log(stock)
+            }
+          }
+          next()
+        }
+      }, err2 => next(new Error(errMsg2)))
+
+      // let stock = getStockState(sourcePlace._id)
+      // if (hasEnough(order.stock, stock)) {
+      //   next()
+      // } else {
+      //   next(new Error(errMsg2))
+      // }
+    } else {
+      next() // no need for verification since the source is external
+    }
+  }, (err1) => {
+    let errMsg1 = 'placeIdSource doesn\'t correspond to any document in Place'
+    next(new Error(errMsg1))
+  })
 })
 
-OrderSchema.plugin(autoIncr.plugin, modelName)
-export let Order = mongoose.model('Order', OrderSchema)
+// validate userId
+OrderSchema.path('userId').validate((value, next) => {
+  User.findOne({ _id: value }).exec()
+  .then((document) => {
+    if (! document) {
+      next(false)
+    } else {
+      next(true)
+    }
+  }, err => next(false))
+}, 'userId doesn\'t correspond to any document in User')
+
+// validate placeIdDestination
+OrderSchema.path('placeIdDestination').validate((value, next) => {
+  Place.findOne({ _id: value }).exec()
+  .then((document) => {
+    if (! document) {
+      next(false)
+    } else {
+      next(true)
+    }
+  }, err => next(false))
+}, 'placeIdDestination doesn\'t correspond to any document in Place')

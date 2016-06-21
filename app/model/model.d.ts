@@ -6,10 +6,8 @@ import * as mongoose from 'mongoose'
 export interface DatabaseObject {
   connection: mongoose.Connection
   category: mongoose.Model<mongoose.Document>
-  company: mongoose.Model<mongoose.Document>
   order: mongoose.Model<mongoose.Document>
   place: mongoose.Model<mongoose.Document>
-  sub_category: mongoose.Model<mongoose.Document>
   user: mongoose.Model<mongoose.Document>
 }
 
@@ -17,18 +15,12 @@ export interface Category {
   _id: number
   name: string
   description?: string
-}
-
-export interface SubCategory {
-  _id: number
-  name: string
-  categoryId: number
-  description?: string
+  subCategoryId?: Array<number>
 }
 
 export interface Stock {
+  _id: number
   categoryId: number
-  subCategoryId?: number
   quantity: number
   unitPrice: number
   description?: string
@@ -41,18 +33,12 @@ export interface File {
   description?: string
 }
 
-export interface Company {
-  _id: number
-  name: string
-  description?: string
-}
-
 export interface Place {
   _id: number
   name: string
-  companyId?: number
   address?: string
   description?: string
+  internalStock: boolean
 }
 
 export interface User {
@@ -66,7 +52,7 @@ export interface Order {
   _id: number
   date: Date
   file?: Array<File>,
-  placeIdSource?: number
+  placeIdSource: number
   placeIdDestination: number
   reference: string
   stock: Array<Stock>

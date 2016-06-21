@@ -21,6 +21,9 @@ export let UserSchema = new mongoose.Schema({
   password: { required: true, type: String }
 })
 
+UserSchema.plugin(autoIncr.plugin, modelName)
+export let User = mongoose.model(modelName, UserSchema)
+
 // hashing password
 UserSchema.pre('save', function (next: Function): void {
   let user = this
@@ -54,6 +57,3 @@ UserSchema.pre('remove', function (next: Function): void {
   Order.remove({ userId: this._id }).exec()
   next()
 })
-
-UserSchema.plugin(autoIncr.plugin, modelName)
-export let User = mongoose.model(modelName, UserSchema)

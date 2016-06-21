@@ -3,15 +3,14 @@
  */
 import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
-import {Company} from './company'
 import {Order} from './order'
 
 const modelName = 'Place'
 
 export let PlaceSchema = new mongoose.Schema({
   address: String,
-  companyId: { ref: 'Company', type: Number },
   description: String,
+  internalStock: { default: true, type: Boolean },
   name: {
     index: { unique: true },
     lowercase: true,
@@ -21,16 +20,9 @@ export let PlaceSchema = new mongoose.Schema({
   }
 })
 
-// validate companyId
-PlaceSchema.path('companyId').validate((value, respond) => {
-  Company.findOne({ _id: value }, (err, document) => {
-    if (err || ! document) {
-      respond(false)
-    } else {
-      respond(true)
-    }
-  })
-}, `companyId doesn\'t correspond to any document in Company`)
+// Plugins
+PlaceSchema.plugin(autoIncr.plugin, modelName)
+export let Place = mongoose.model(modelName, PlaceSchema)
 
 // cascade delete of orders
 PlaceSchema.pre('remove', function (next: Function): void {
@@ -47,21 +39,16 @@ async function (ltdate?: Date, gtdate?: Date): Promise<any> {
     let place = this
     let outputOrder = await Order
       .find({
-        date: { $gt: gtdate, $lt: ltdate },
-        placeIdSource: place._id,
-        select: { stock: 1 }
-      })
+        date: { $lt: ltdate },
+        placeIdSource: place._id
+      }).exec()
     let inputOrder = await Order
       .find({
-        date: { $gt: gtdate, $lt: ltdate },
-        placeIdDestination: place._id,
-        select: { stock: 1 }
-      })
-    // then ??
+        date: { $lt: ltdate },
+        placeIdDestination: place._id
+      }).exec()
+      // then...
   } catch (err) {
     return err
   }
 }
-
-PlaceSchema.plugin(autoIncr.plugin, modelName)
-export let Place = mongoose.model(modelName, PlaceSchema)

@@ -11,8 +11,6 @@ autoIncr.initialize(mongoose.connection) // auto increment
 // models
 import {User} from './user'
 import {Category} from './category'
-import {SubCategory} from './sub_category'
-import {Company} from './company'
 import {Place} from './place'
 import {Order} from './order'
 
@@ -28,11 +26,9 @@ Promise<DatabaseObject> {
 
       resolve({
         category: Category,
-        company: Company,
         connection: mongoose.connection,
         order: Order,
         place: Place,
-        sub_category: SubCategory,
         user: User
       })
     })
