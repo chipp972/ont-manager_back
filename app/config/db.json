@@ -6,7 +6,8 @@
     "user": "nico",
     "password": "covage",
     "database": "dev_stock_manager",
-    "type": "mongodb"
+    "type": "mongodb",
+    "logfile": "./log/dev-db.log"
   },
   {
     "name": "prod",
@@ -15,7 +16,8 @@
     "user": "nico",
     "password": "covage",
     "database": "stock_manager",
-    "type": "mongodb"
+    "type": "mongodb",
+    "logfile": "./log/dev-db.log"
   },
   {
     "name": "test",
@@ -24,6 +26,7 @@
     "user": "nico",
     "password": "covage",
     "database": "test_stock_manager",
-    "type": "mongodb"
+    "type": "mongodb",
+    "logfile": "./log/dev-db.log"
   }
 ]

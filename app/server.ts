@@ -1,7 +1,7 @@
-import {getServerConfig, getDatabaseConfig} from './config'
-
 import * as express from 'express'
-import {getLogger} from './logger'
+
+import {getServerConfig} from './config'
+import {getLogger} from 'app/lib/logger'
 import {initDatabase} from './model'
 import {generateRoutes} from './route'
 
@@ -10,19 +10,21 @@ export let initServer =
   try {
     let serverConfigName = sconf || 'dev'
     let databaseConfigName = dconf || 'dev'
-    let servConf = await getServerConfig(serverConfigName)
-    let dbConf = await getDatabaseConfig(databaseConfigName)
 
-    let logger = getLogger(servConf.logfile)
-    let database = await initDatabase(dbConf, logger)
+    let config = await getServerConfig(serverConfigName)
+    let logger = getLogger(config.logfile)
+    let database = await initDatabase(databaseConfigName)
+
+    // routes
     let app = express()
-
     app.use(generateRoutes(app, database))
 
-    let server = app.listen(servConf.port, servConf.host, () => {
-      logger.info(`App listening on http://${servConf.host}:${servConf.port}`)
+    // starts the server
+    let server = app.listen(config.port, config.host, () => {
+      logger.info(`App listening on http://${config.host}:${config.port}`)
     })
 
+    // logging events
     server.on('request', (req: express.Request) => {
       logger.debug(`${req.ip} -> ${req.method} ${req.url}`)
     })
@@ -31,12 +33,7 @@ export let initServer =
       logger.error(`server error: ${err}`)
     })
 
-    database.connection.on('error', (err: Error) => {
-      logger.error(`database error: ${err}`)
-    })
-
     database.connection.once('disconnected', () => {
-      logger.debug('database connection: ended')
       logger.debug('server is down')
       process.exit(0)
     })

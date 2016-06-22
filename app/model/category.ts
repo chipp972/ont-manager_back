@@ -23,7 +23,9 @@ export let CategorySchema = new mongoose.Schema({
 CategorySchema.plugin(autoIncr.plugin, modelName)
 export let Category = mongoose.model(modelName, CategorySchema)
 
-// TODO verif pas de recursivité
+/**
+ * TODO verif pas de recursivité
+ */
 
 // validate subCategoryId
 CategorySchema.path('subCategoryId').validate((value, next) => {
@@ -44,13 +46,20 @@ CategorySchema.path('subCategoryId').validate((value, next) => {
   .catch((err) => next(false))
 }, 'subCategoryId doesn\'t correspond to any document in Category')
 
-// cascade delete of stock in orders
+// block delete of category if used as a subCategory or in order
 CategorySchema.pre('remove', function (next: Function): void {
+  let category = this
+  console.log(category)
+
   Order.find({}).exec()
   .then((orderList) => {
-    // for (order of orderList) {
-    //
-    // }
+    for (let order of orderList) {
+      for (let stock of order.get('stock')) {
+        if (stock.categoryId === category._id) {
+          next(new Error('Category used in an order'))
+        }
+      }
+    }
     next()
   })
 })

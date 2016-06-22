@@ -54,7 +54,8 @@ export interface Order {
   file?: Array<File>,
   placeIdSource: number
   placeIdDestination: number
-  reference: string
+  reference?: string
   stock: Array<Stock>
   userId: number
+  reservation: boolean
 }

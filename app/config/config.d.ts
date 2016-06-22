@@ -2,12 +2,12 @@ interface Config {
   name: string
   user?: string
   password?: string
+  logfile: string
 }
 
 export interface ServerConfig extends Config {
   host: string
   port: number
-  logfile: string
 }
 
 declare enum DatabaseType {

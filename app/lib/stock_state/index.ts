@@ -1,8 +1,13 @@
 /**
  * Utility function on the models
  */
-import {Stock} from './model.d.ts'
-import {Order} from './order'
+import {Stock} from 'app/model//model.d.ts'
+import {Order} from 'app/model/order'
+
+/**
+ * TODO function to get stock in a more readable way with category name,
+ * unit price etc.
+ */
 
 /**
  * Determine if the stock state has all the stock in the stock list given
@@ -76,5 +81,3 @@ date?: Date): Promise<Object> {
 
   return stockState
 }
-
-// TODO function to get stockState for a category

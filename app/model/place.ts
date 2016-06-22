@@ -24,31 +24,22 @@ export let PlaceSchema = new mongoose.Schema({
 PlaceSchema.plugin(autoIncr.plugin, modelName)
 export let Place = mongoose.model(modelName, PlaceSchema)
 
-// cascade delete of orders
+// block delete if orders with this placeId remains
 PlaceSchema.pre('remove', function (next: Function): void {
-  Order.remove({ placeIdSource: this._id }).exec()
-  Order.remove({ placeIdDestination: this._id }).exec()
-  next()
+  let errMsg = 'Orders with this place remain'
+  Order.find({ placeIdSource: this._id }).exec()
+  .then((orderList1) => {
+    if (orderList1.length > 0) {
+      next(new Error(errMsg))
+    } else {
+      Order.find({ placeIdDestination: this._id }).exec()
+      .then((orderList2) => {
+        if (orderList2.length > 0) {
+          next(new Error(errMsg))
+        } else {
+          next()
+        }
+      }, err => next(new Error(errMsg)))
+    }
+  }, err => next(new Error(errMsg)))
 })
-
-// method to find all stock from a place at a certain date
-// put in the databaseObject ?
-PlaceSchema['methods'].getStockState =
-async function (ltdate?: Date, gtdate?: Date): Promise<any> {
-  try {
-    let place = this
-    let outputOrder = await Order
-      .find({
-        date: { $lt: ltdate },
-        placeIdSource: place._id
-      }).exec()
-    let inputOrder = await Order
-      .find({
-        date: { $lt: ltdate },
-        placeIdDestination: place._id
-      }).exec()
-      // then...
-  } catch (err) {
-    return err
-  }
-}

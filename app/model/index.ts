@@ -1,9 +1,10 @@
-import {DatabaseConfig} from 'app/config/config.d.ts'
 import {DatabaseObject} from './model.d.ts'
 
 import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
-import {LoggerInstance} from 'winston'
+
+import {getDatabaseConfig} from 'app/config'
+import {getLogger} from 'app/lib/logger'
 
 // mongoose plugins initialization
 autoIncr.initialize(mongoose.connection) // auto increment
@@ -14,28 +15,44 @@ import {Category} from './category'
 import {Place} from './place'
 import {Order} from './order'
 
-export function initDatabase (config: DatabaseConfig, logger: LoggerInstance):
+export async function initDatabase (configName: string):
 Promise<DatabaseObject> {
-  let uri: string
-  uri = `${config.type}://${config.host}:${config.port}/${config.database}`
+  try {
+    let config = await getDatabaseConfig(configName)
+    let logger = getLogger(config.logfile)
 
-  return new Promise<DatabaseObject>((resolve, reject) => {
-    mongoose.connect(uri, config)
-    mongoose.connection.once('connected', () => {
-      logger.info('database connection: success')
+    let uri: string
+    uri = `${config.type}://${config.host}:${config.port}/${config.database}`
 
-      resolve({
-        category: Category,
-        connection: mongoose.connection,
-        order: Order,
-        place: Place,
-        user: User
+    let dbObjPromise = new Promise<DatabaseObject>((resolve, reject) => {
+      mongoose.connect(uri, config)
+      mongoose.connection.once('connected', () => {
+        logger.info('database connection: success')
+
+        resolve({
+          category: Category,
+          connection: mongoose.connection,
+          order: Order,
+          place: Place,
+          user: User
+        })
+      })
+
+      mongoose.connection.on('error', (err) => {
+        logger.error(`database error: ${err}`)
+        if (! dbObjPromise.isFulfilled) {
+          reject(err)
+        }
+      })
+
+      mongoose.connection.on('disconnected', () => {
+        logger.debug('database connection: ended')
       })
     })
 
-    mongoose.connection.once('error', (err) => {
-      logger.error(`database error: ${err}`)
-      reject(err)
-    })
-  })
+    return dbObjPromise
+
+  } catch (err) {
+    throw err
+  }
 }

@@ -43,17 +43,14 @@ UserSchema.pre('save', function (next: Function): void {
   })
 })
 
-// password comparison
-UserSchema['methods'].comparePassword =
-  function (candidate: string, callback: Function): any {
-    bcrypt.compare(candidate, this.password, (err, isMatch) => {
-      if (err) { return callback(err) }
-      callback(undefined, isMatch)
-    })
-}
-
 // cascade delete of orders
 UserSchema.pre('remove', function (next: Function): void {
-  Order.remove({ userId: this._id }).exec()
-  next()
+  Order.find({ userId: this._id }).exec()
+  .then((documents) => {
+    if (documents.length > 0) {
+      next(new Error('This user is in some orders'))
+    } else {
+      next()
+    }
+  })
 })

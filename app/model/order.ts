@@ -3,7 +3,7 @@ import * as autoIncr from 'mongoose-auto-increment'
 import {StockSchema} from './stock'
 import {User} from './user'
 import {Place} from './place'
-import {getStockState, hasEnoughStock} from './utils'
+import {getStockState, hasEnoughStock} from 'app/lib/stock_state'
 
 const modelName = 'Order'
 
@@ -17,7 +17,8 @@ export let OrderSchema = new mongoose.Schema({
   }],
   placeIdDestination: { ref: 'Place', required: true, type: Number },
   placeIdSource: { ref: 'Place', required: true, type: Number },
-  reference: { index: { unique: true }, required: true, type: String },
+  reference: String,
+  reservation: { default: false, type: Boolean },
   stock: [StockSchema],
   userId: { ref: 'User', required: true, type: Number }
 })
@@ -42,7 +43,6 @@ OrderSchema.pre('save', function (next: Function): void {
 
       getStockState(placeId, order.date)
       .then((stockState) => {
-        console.log(stockState)
         if (hasEnoughStock(stockState, order.stock)) {
           next()
         } else {
@@ -82,3 +82,17 @@ OrderSchema.path('placeIdDestination').validate((value, next) => {
     }
   }, err => next(false))
 }, 'placeIdDestination doesn\'t correspond to any document in Place')
+
+// validate reference
+OrderSchema.path('reference').validate((value, next) => {
+  let order = this
+  console.log(order)
+  // check if it's a reservation when there is no reference
+  if (! value) {
+    if (! order.reservation) {
+      next(false)
+    } else {
+      next(true)
+    }
+  }
+}, 'reference is not valid')

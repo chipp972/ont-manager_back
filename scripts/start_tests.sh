@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
-cd $(dirname $0)/..
+cd "$(dirname $0)/.."
 
 if [ ! -e node_modules/.bin/mocha ]
 then
