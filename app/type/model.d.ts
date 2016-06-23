@@ -41,11 +41,20 @@ export interface Place {
   internalStock: boolean
 }
 
+export interface Alert {
+  _id: number
+  categoryId: number
+  placeId: number
+  threshold: number
+  description?: string
+}
+
 export interface User {
   _id: number
   mail: string
   password: string
   admin: boolean
+  alertList: Array<Alert>
 }
 
 export interface Order {

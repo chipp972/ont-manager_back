@@ -4,6 +4,7 @@
 import * as mongoose from 'mongoose'
 import * as bcrypt from 'bcryptjs'
 import * as autoIncr from 'mongoose-auto-increment'
+import {AlertSchema} from './alert'
 import {Order} from './order'
 
 const SALT = 10
@@ -11,6 +12,7 @@ const modelName = 'User'
 
 export let UserSchema = new mongoose.Schema({
   admin: { default: false, type: Boolean },
+  alertList: [AlertSchema],
   email: {
     index: { unique: true},
     lowercase: true,
@@ -21,6 +23,7 @@ export let UserSchema = new mongoose.Schema({
   password: { required: true, type: String }
 })
 
+// Plugins
 UserSchema.plugin(autoIncr.plugin, modelName)
 export let User = mongoose.model(modelName, UserSchema)
 

@@ -1,4 +1,4 @@
-import {DatabaseObject} from './model.d.ts'
+import {DatabaseObject} from 'app/type/model.d.ts'
 
 import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
@@ -9,10 +9,15 @@ import {getLogger} from 'app/lib/logger'
 // mongoose plugins initialization
 autoIncr.initialize(mongoose.connection) // auto increment
 
+/**
+ * TODO can't do it because of fail typings definition
+ * mongoose.Promise = global.Promise
+ */
+
 // models
-import {User} from './user'
 import {Category} from './category'
 import {Place} from './place'
+import {User} from './user'
 import {Order} from './order'
 
 export async function initDatabase (configName: string):

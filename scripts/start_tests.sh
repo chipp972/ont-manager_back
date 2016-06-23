@@ -9,7 +9,7 @@ then
   exit 1
 fi
 
-FILES=$(find . -name '*.js' | grep -v node_modules | grep __tests__)
+FILES=$(find . -name 'index.js' | grep -v node_modules | grep __tests__)
 
 for file in $FILES
 do

@@ -1,4 +1,4 @@
-import {DatabaseObject} from 'app/model/model.d.ts'
+import {DatabaseObject} from 'app/type/model.d.ts'
 import {Express, Router} from 'express'
 import {getModelRoutes} from './model'
 

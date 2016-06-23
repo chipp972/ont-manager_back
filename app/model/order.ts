@@ -1,9 +1,12 @@
 import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
+
+import {checkRef} from './utils'
 import {StockSchema} from './stock'
 import {User} from './user'
 import {Place} from './place'
-import {getStockState, hasEnoughStock} from 'app/lib/stock_state'
+import {getStockState, hasEnoughStock} from '../lib/stock_state'
+import {alertCheck} from '../lib/alert'
 
 const modelName = 'Order'
 
@@ -59,29 +62,15 @@ OrderSchema.pre('save', function (next: Function): void {
   })
 })
 
-// validate userId
-OrderSchema.path('userId').validate((value, next) => {
-  User.findOne({ _id: value }).exec()
-  .then((document) => {
-    if (! document) {
-      next(false)
-    } else {
-      next(true)
-    }
-  }, err => next(false))
-}, 'userId doesn\'t correspond to any document in User')
+// check for user alerts on the stock
+OrderSchema.post('save', (order) => {
+  alertCheck(order)
+})
 
-// validate placeIdDestination
-OrderSchema.path('placeIdDestination').validate((value, next) => {
-  Place.findOne({ _id: value }).exec()
-  .then((document) => {
-    if (! document) {
-      next(false)
-    } else {
-      next(true)
-    }
-  }, err => next(false))
-}, 'placeIdDestination doesn\'t correspond to any document in Place')
+// reference validations
+checkRef(OrderSchema, 'userId', User)
+checkRef(OrderSchema, 'placeIdDestination', Place)
+checkRef(OrderSchema, 'placeIdSource', Place)
 
 // validate reference
 OrderSchema.path('reference').validate((value, next) => {

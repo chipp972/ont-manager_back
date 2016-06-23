@@ -49,8 +49,6 @@ CategorySchema.path('subCategoryId').validate((value, next) => {
 // block delete of category if used as a subCategory or in order
 CategorySchema.pre('remove', function (next: Function): void {
   let category = this
-  console.log(category)
-
   Order.find({}).exec()
   .then((orderList) => {
     for (let order of orderList) {

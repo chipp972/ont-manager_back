@@ -3,7 +3,7 @@
  */
 import * as fs from 'fs'
 import * as path from 'path'
-import {ServerConfig, DatabaseConfig} from './config.d.ts'
+import {ServerConfig, DatabaseConfig} from 'app/type/config.d.ts'
 
 const configpath = 'app/config'
 // or __dirname if find a solution to put config files in dist/app/config/

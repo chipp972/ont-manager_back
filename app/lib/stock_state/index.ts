@@ -1,8 +1,8 @@
 /**
  * Utility function on the models
  */
-import {Stock} from 'app/model//model.d.ts'
-import {Order} from 'app/model/order'
+import {Stock} from 'app/type//model.d.ts'
+import {Order} from '../../model/order'
 
 /**
  * TODO function to get stock in a more readable way with category name,

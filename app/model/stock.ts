@@ -1,5 +1,7 @@
 import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
+
+import {checkRef} from './utils'
 import {Category} from './category'
 
 const modelName = 'Stock'
@@ -14,14 +16,5 @@ export let StockSchema = new mongoose.Schema({
 // Plugins
 StockSchema.plugin(autoIncr.plugin, modelName)
 
-// validate categoryId
-StockSchema.path('categoryId').validate((value, next) => {
-  Category.findOne({ _id: value }).exec()
-  .then((document) => {
-    if (! document) {
-      next(false)
-    } else {
-      next(true)
-    }
-  }, err => next(false))
-}, 'categoryId doesn\'t correspond to any document in Category')
+// reference validation
+checkRef(StockSchema, 'categoryId', Category)
