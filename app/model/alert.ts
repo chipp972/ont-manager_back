@@ -2,8 +2,8 @@ import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
 
 import {checkRef} from './utils'
-import {Category} from './category'
-import {Place} from './place'
+import {CategoryModel} from './category'
+import {PlaceModel} from './place'
 
 const modelName = 'Alert'
 
@@ -18,8 +18,8 @@ export let AlertSchema = new mongoose.Schema({
 AlertSchema.plugin(autoIncr.plugin, modelName)
 
 // reference validation
-checkRef(AlertSchema, 'categoryId', Category)
-checkRef(AlertSchema, 'placeId', Place)
+checkRef(AlertSchema, 'categoryId', CategoryModel)
+checkRef(AlertSchema, 'placeId', PlaceModel)
 
 // check if threshold positive
 AlertSchema.path('threshold').validate((value, next) => {

@@ -17,7 +17,6 @@ if (os.type() === 'Windows_NT') {
   path = join(__dirname, '../node_modules/app')
   command = `ln -s ../app ${path}`
 }
-console.log(path)
 
 access(path, R_OK, (err) => {
   if (! err) {

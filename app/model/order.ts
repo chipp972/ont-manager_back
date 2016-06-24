@@ -3,9 +3,9 @@ import * as autoIncr from 'mongoose-auto-increment'
 
 import {checkRef} from './utils'
 import {StockSchema} from './stock'
-import {User} from './user'
-import {Place} from './place'
-import {getStockState, hasEnoughStock} from '../lib/stock_state'
+import {UserModel} from './user'
+import {PlaceModel} from './place'
+import {StockState} from '../lib/stock_state'
 import {alertCheck} from '../lib/alert'
 
 const modelName = 'Order'
@@ -28,38 +28,31 @@ export let OrderSchema = new mongoose.Schema({
 
 // Plugins
 OrderSchema.plugin(autoIncr.plugin, modelName)
-export let Order = mongoose.model('Order', OrderSchema)
+export let OrderModel = mongoose.model('Order', OrderSchema)
 
 // check if the stock required is present in the source
 OrderSchema.pre('save', function (next: Function): void {
   let order = this
 
-  Place.findOne({ _id: order.placeIdSource }).exec()
+  PlaceModel.findOne({ _id: order.placeIdSource }).exec()
   .then((sourcePlace) => {
     if (sourcePlace.get('internalStock')) { // verification needed
       let errMsg2 = 'Not enough stock in source place'
       let placeId = sourcePlace.get('_id')
+      order.date = order.date || new Date()
 
-      if (! order.date) {
-        order.date = new Date()
+      let placeStockState = new StockState(placeId, order.date)
+      if (placeStockState.hasEnoughStock(order.stock)) {
+        console.log(placeStockState.toObject)
+        next()
+      } else {
+        next(new Error(errMsg2))
       }
-
-      getStockState(placeId, order.date)
-      .then((stockState) => {
-        if (hasEnoughStock(stockState, order.stock)) {
-          next()
-        } else {
-          next(new Error(errMsg2))
-        }
-      })
 
     } else {
       next() // no need for verification since the source is external
     }
-  }, (err1) => {
-    let errMsg1 = 'placeIdSource doesn\'t correspond to any document in Place'
-    next(new Error(errMsg1))
-  })
+  }, (err) => next(err))
 })
 
 // check for user alerts on the stock
@@ -68,14 +61,14 @@ OrderSchema.post('save', (order) => {
 })
 
 // reference validations
-checkRef(OrderSchema, 'userId', User)
-checkRef(OrderSchema, 'placeIdDestination', Place)
-checkRef(OrderSchema, 'placeIdSource', Place)
+checkRef(OrderSchema, 'userId', UserModel)
+checkRef(OrderSchema, 'placeIdDestination', PlaceModel)
+checkRef(OrderSchema, 'placeIdSource', PlaceModel)
 
-// validate reference
+// validate reference (the field)
 OrderSchema.path('reference').validate((value, next) => {
   let order = this
-  console.log(order)
+
   // check if it's a reservation when there is no reference
   if (! value) {
     if (! order.reservation) {

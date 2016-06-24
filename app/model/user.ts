@@ -5,7 +5,7 @@ import * as mongoose from 'mongoose'
 import * as bcrypt from 'bcryptjs'
 import * as autoIncr from 'mongoose-auto-increment'
 import {AlertSchema} from './alert'
-import {Order} from './order'
+import {OrderModel} from './order'
 
 const SALT = 10
 const modelName = 'User'
@@ -25,7 +25,7 @@ export let UserSchema = new mongoose.Schema({
 
 // Plugins
 UserSchema.plugin(autoIncr.plugin, modelName)
-export let User = mongoose.model(modelName, UserSchema)
+export let UserModel = mongoose.model(modelName, UserSchema)
 
 // hashing password
 UserSchema.pre('save', function (next: Function): void {
@@ -48,7 +48,7 @@ UserSchema.pre('save', function (next: Function): void {
 
 // cascade delete of orders
 UserSchema.pre('remove', function (next: Function): void {
-  Order.find({ userId: this._id }).exec()
+  OrderModel.find({ userId: this._id }).exec()
   .then((documents) => {
     if (documents.length > 0) {
       next(new Error('This user is in some orders'))

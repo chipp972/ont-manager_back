@@ -15,10 +15,10 @@ autoIncr.initialize(mongoose.connection) // auto increment
  */
 
 // models
-import {Category} from './category'
-import {Place} from './place'
-import {User} from './user'
-import {Order} from './order'
+import {CategoryModel} from './category'
+import {PlaceModel} from './place'
+import {UserModel} from './user'
+import {OrderModel} from './order'
 
 export async function initDatabase (configName: string):
 Promise<DatabaseObject> {
@@ -35,11 +35,11 @@ Promise<DatabaseObject> {
         logger.info('database connection: success')
 
         resolve({
-          category: Category,
+          category: CategoryModel,
           connection: mongoose.connection,
-          order: Order,
-          place: Place,
-          user: User
+          order: OrderModel,
+          place: PlaceModel,
+          user: UserModel
         })
       })
 

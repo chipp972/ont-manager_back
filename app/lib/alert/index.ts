@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose'
-import {User} from '../../model/user'
+import {UserModel} from '../../model/user'
 
 /**
  * Check if any user has an alert on the stock state
@@ -9,12 +9,13 @@ import {User} from '../../model/user'
 export async function alertCheck (order: mongoose.Document): Promise<Object> {
   try {
     // let placeId = order.get('placeIdSource')
-    let userList = await User.find({}).exec()
+    let userList = await UserModel.find({}).exec()
     for (let user of userList) {
       for (let alert of user.get('alertList')) {
         alert.get('placeId')
         /**
          * TODO finish alertCheck
+         * and send mails to users
          */
       }
     }

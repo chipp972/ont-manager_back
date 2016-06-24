@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
 
 import {checkRef} from './utils'
-import {Category} from './category'
+import {CategoryModel} from './category'
 
 const modelName = 'Stock'
 
@@ -17,4 +17,4 @@ export let StockSchema = new mongoose.Schema({
 StockSchema.plugin(autoIncr.plugin, modelName)
 
 // reference validation
-checkRef(StockSchema, 'categoryId', Category)
+checkRef(StockSchema, 'categoryId', CategoryModel)

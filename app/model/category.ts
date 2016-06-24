@@ -3,7 +3,8 @@
  */
 import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
-import {Order} from './order'
+import {checkRef} from './utils'
+import {OrderModel} from './order'
 
 const modelName = 'Category'
 
@@ -16,40 +17,20 @@ export let CategorySchema = new mongoose.Schema({
     trim: true,
     type: String
   },
-  subCategoryId: [{ ref: 'Category', type: Number }]
+  upperCategoryId: { ref: 'Category', type: Number }
 })
 
 // Plugins
 CategorySchema.plugin(autoIncr.plugin, modelName)
-export let Category = mongoose.model(modelName, CategorySchema)
+export let CategoryModel = mongoose.model(modelName, CategorySchema)
 
-/**
- * TODO verif pas de recursivité
- */
+// validate upperCategoryId
+checkRef(CategorySchema, 'upperCategoryId', CategoryModel)
 
-// validate subCategoryId
-CategorySchema.path('subCategoryId').validate((value, next) => {
-  let promiseList = []
-  for (let subcategory of value) {
-    let p = Category.findOne({ _id: subcategory }).exec()
-    .then((document) => {
-      if (! document) {
-        p.reject(new Error())
-      } else {
-        p.resolve()
-      }
-    }, err => p.reject(new Error()))
-    promiseList.push(p)
-  }
-  Promise.all(promiseList)
-  .then(() => next(true))
-  .catch((err) => next(false))
-}, 'subCategoryId doesn\'t correspond to any document in Category')
-
-// block delete of category if used as a subCategory or in order
+// block delete of category if used in an order
 CategorySchema.pre('remove', function (next: Function): void {
   let category = this
-  Order.find({}).exec()
+  OrderModel.find({}).exec()
   .then((orderList) => {
     for (let order of orderList) {
       for (let stock of order.get('stock')) {

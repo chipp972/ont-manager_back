@@ -15,7 +15,7 @@ export interface Category {
   _id: number
   name: string
   description?: string
-  subCategoryId?: Array<number>
+  upperCategoryId?: number
 }
 
 export interface Stock {

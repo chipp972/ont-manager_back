@@ -45,7 +45,7 @@
         }
       ],
       "curly": true,
-      "forin": true,
+      "forin": false,
       "label-position": true,
       "no-arg": true,
       "no-bitwise": false,

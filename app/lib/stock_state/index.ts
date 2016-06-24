@@ -1,83 +1,143 @@
 /**
- * Utility function on the models
+ * Calculate stock state
  */
-import {Stock} from 'app/type//model.d.ts'
-import {Order} from '../../model/order'
+import {Stock, Place} from 'app/type//model.d.ts'
+import {PlaceModel} from '../../model/place'
+import {OrderModel} from '../../model/order'
+import {CategoryModel} from '../../model/category'
+import {getChildrenCategory} from './utils'
 
-/**
- * TODO function to get stock in a more readable way with category name,
- * unit price etc.
- */
+export class StockState {
+  private placeId: number
+  private date: Date
+  private state: Object
 
-/**
- * Determine if the stock state has all the stock in the stock list given
- * @param  {Object}       stockState the stock state
- * @param  {Array<Stock>} stockList  a list of stocks from an order
- * @return {boolean}                 if the stock state contains the stocks
- */
-export function hasEnoughStock (stockState: Object,
-stockList: Array<Stock>): boolean {
-  for (let stock of stockList) {
-    let key = `${stock.categoryId}_${stock.unitPrice}`
-    if (! stockState[key] || (stockState[key] - stock.quantity < 0)) {
-      return false
+  /**
+   * @param  {number} placeId the id field of the place
+   * @param  {Date}   date    the date at which we want the stock state
+   */
+  public constructor (placeId: number, date?: Date) {
+    this.placeId = placeId
+    this.date = date || new Date()
+    this.state = undefined
+  }
+
+  /**
+   * get a stock state object in a more human readable state with category
+   * names, unit prices for each category and quantity for each unit price
+   * @param  {Object}          stockState the stockState object to convert
+   * @return {Promise<Object>}            the new stock state
+   */
+  public async toObject (): Promise<Object> {
+    try {
+      this.state = this.state || await this.calculateStockState()
+      let result: Object = {}
+
+      for (let prop in this.state) {
+        let tmp = /(\d+)_(\d+)/.exec(prop)
+        let categoryId = tmp[0]
+        let price = tmp[1]
+
+        let category = await CategoryModel.findOne({ _id: categoryId }).exec()
+        let categoryName = category.get('name')
+        result[categoryName] = result[categoryName] || {}
+        result[categoryName][price] = this.state[prop]
+      }
+      return result
+
+    } catch (err) {
+      throw err
     }
   }
-  return true
-}
 
-/**
- * Determine the stock of a place at a given date
- * @param  {number}          placeId the id of the place
- * @param  {Date}            date    the date when we want the stock state
- * @return {Promise<Object>}         the stock state
- */
-export async function getStockState (placeId: number,
-date?: Date): Promise<Object> {
-  let stockState: Object = {}
-  if (! date) { date = new Date() }
-
-  // input first
-  try {
-    let orderList = await Order.find({
-      date: { $lt: date },
-      placeIdDestination: placeId
-    }).exec()
-
-    for (let currOrder of orderList) {
-      for (let stock of currOrder.get('stock')) {
-        let key = `${stock.get('categoryId')}_${stock.get('unitPrice')}`
-        if (stockState[key] !== undefined) {
-          stockState[key] += stock.get('quantity')
-        } else {
-          stockState[key] = stock.get('quantity')
-        }
+  /**
+   * Determine if the stock state has all the stock in the stock list given
+   * @param  {Object}       stockState the stock state
+   * @param  {Array<Stock>} stockList  a list of stocks from an order
+   * @return {boolean}                 if the stock state contains the stocks
+   */
+  public async hasEnoughStock (stockList: Array<Stock>): Promise<boolean> {
+    this.state = this.state || await this.calculateStockState()
+    for (let stock of stockList) {
+      let key = `${stock.categoryId}_${stock.unitPrice}`
+      if (! this.state[key] || (this.state[key] - stock.quantity < 0)) {
+        return false
       }
     }
-  } catch (err) {
-    throw err
+    return true
   }
 
-  // output then
-  try {
-    let orderList = await Order.find({
-      date: { $lt: date },
-      placeIdSource: placeId
-    }).exec()
+  public getDate (): Date {
+    return this.date
+  }
 
-    for (let currOrder of orderList) {
-      for (let stock of currOrder.get('stock')) {
-        let key = `${stock.get('categoryId')}_${stock.get('unitPrice')}`
-        if (stockState[key] !== undefined) {
-          stockState[key] -= stock.get('quantity')
-        } else {
-          stockState[key] = -stock.get('quantity')
+  public getPlaceId (): number {
+    return this.placeId
+  }
+
+  /**
+   * @return {Promise<Object>} the place object
+   */
+  public async getPlace (): Promise<Place> {
+    try {
+      let place = await PlaceModel.findOne({ _id: this.placeId }).exec()
+      return place.toObject() as Place
+    } catch (err) {
+      throw err
+    }
+  }
+
+  /**
+   * Determine the stock of a place at a given date
+   * @param  {number}          placeId the id of the place
+   * @param  {Date}            date    the date when we want the stock state
+   * @return {Promise<Object>}         the stock state
+   */
+  private async calculateStockState (): Promise<Object> {
+    let stockState: Object = {}
+
+    // input first
+    try {
+      let orderList = await OrderModel.find({
+        date: { $lt: this.date },
+        placeIdDestination: this.placeId
+      }).exec()
+
+      for (let currOrder of orderList) {
+        for (let stock of currOrder.get('stock')) {
+          let key = `${stock.get('categoryId')}_${stock.get('unitPrice')}`
+          if (stockState[key] !== undefined) {
+            stockState[key] += stock.get('quantity')
+          } else {
+            stockState[key] = stock.get('quantity')
+          }
         }
       }
+    } catch (err) {
+      throw err
     }
-  } catch (err) {
-    throw err
-  }
 
-  return stockState
+    // output then
+    try {
+      let orderList = await OrderModel.find({
+        date: { $lt: this.date },
+        placeIdSource: this.placeId
+      }).exec()
+
+      for (let currOrder of orderList) {
+        for (let stock of currOrder.get('stock')) {
+          let key = `${stock.get('categoryId')}_${stock.get('unitPrice')}`
+          if (stockState[key] !== undefined) {
+            stockState[key] -= stock.get('quantity')
+          } else {
+            stockState[key] = -stock.get('quantity')
+          }
+        }
+      }
+    } catch (err) {
+      throw err
+    }
+
+    return stockState
+  }
 }
