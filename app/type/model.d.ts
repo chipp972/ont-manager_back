@@ -51,10 +51,10 @@ export interface Alert {
 
 export interface User {
   _id: number
-  mail: string
+  email: string
   password: string
   admin: boolean
-  alertList: Array<Alert>
+  alertList?: Array<Alert>
 }
 
 export interface Order {

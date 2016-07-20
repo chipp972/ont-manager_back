@@ -1,11 +1,13 @@
 /**
  * User model tests
  */
-import {DatabaseObject} from 'app/type/model.d.ts'
+import {DatabaseObject, User} from 'app/type/model.d.ts'
 import {expect} from 'chai'
 
-let userMock = {
-  mail: 'user.test@email.com',
+let userMock: User = {
+  _id: undefined,
+  admin: false,
+  email: 'user.test@email.com',
   password: 'secret123'
 }
 
@@ -14,16 +16,13 @@ export function userTest (database: DatabaseObject): void {
     it('should add an user', (done) => {
       database.user.remove({}).exec()
       .then(() => {
-        let newUser = new database.user(userMock)
-        newUser.save((err) => {
-          console.log(err)
-          database.user.findOne({ mail: userMock.mail }).exec()
+        database.user.create(userMock)
+        .then((obj) => {
+          database.user.findOne({ mail: userMock.email }).exec()
           .then(result => {
-            console.log('haha')
-            console.log(result.toObject())
             expect(result.toObject()).to.deep.equal(userMock)
+            done()
           })
-          .then(() => done())
         })
       })
     })

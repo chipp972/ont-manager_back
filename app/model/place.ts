@@ -39,7 +39,7 @@ PlaceSchema.pre('remove', function (next: Function): void {
         } else {
           next()
         }
-      }, err => next(new Error(errMsg)))
+      }, err => next(err))
     }
-  }, err => next(new Error(errMsg)))
+  }, err => next(err))
 })

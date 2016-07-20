@@ -39,6 +39,22 @@ CategorySchema.pre('remove', function (next: Function): void {
         }
       }
     }
-    next()
+
+    // if it's not in any order we replace it in all children category
+    CategoryModel.find({ upperCategoryId: category.upperCategoryId }).exec()
+    .then((categoryList) => {
+      let length = categoryList.length
+      let cc = 0
+      for (let c of categoryList) {
+        c.set('upperCategoryId', category.upperCategoryId)
+        c.save((err) => {
+          cc++
+          if (cc === length) {
+            next() // we can suppress
+          }
+        })
+      }
+    })
+
   })
 })

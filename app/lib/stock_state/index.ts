@@ -14,7 +14,7 @@ export class StockState {
 
   /**
    * @param  {number} placeId the id field of the place
-   * @param  {Date}   date    the date at which we want the stock state
+   * @param  {Date}   [date]  the date at which we want the stock state
    */
   public constructor (placeId: number, date?: Date) {
     this.placeId = placeId
@@ -25,24 +25,41 @@ export class StockState {
   /**
    * get a stock state object in a more human readable state with category
    * names, unit prices for each category and quantity for each unit price
-   * @param  {Object}          stockState the stockState object to convert
-   * @return {Promise<Object>}            the new stock state
+   * @param  {number}          [categoryId] limit the result to a category
+   *                                        and its children
+   * @return {Promise<Object>}              the new stock state
    */
-  public async toObject (): Promise<Object> {
+  public async toObject (categoryId?: number): Promise<Object> {
     try {
       this.state = this.state || await this.calculateStockState()
       let result: Object = {}
+      let totalQuantity: number = undefined
+      let categoryList: Array<number> = undefined
+
+      if (categoryId) {
+        categoryList = await getChildrenCategory(categoryId)
+        totalQuantity = 0
+      }
 
       for (let prop in this.state) {
         let tmp = /(\d+)_(\d+)/.exec(prop)
-        let categoryId = tmp[0]
+        let id = tmp[0]
         let price = tmp[1]
 
-        let category = await CategoryModel.findOne({ _id: categoryId }).exec()
-        let categoryName = category.get('name')
-        result[categoryName] = result[categoryName] || {}
-        result[categoryName][price] = this.state[prop]
+        if (! categoryList ||
+        (categoryList && categoryList.indexOf(Number(id)) !== -1)) {
+
+          let category = await CategoryModel.findOne({ _id: id }).exec()
+          let categoryName = category.get('name')
+          result[categoryName] = result[categoryName] || {}
+          result[categoryName][price] = this.state[prop]
+
+          if (categoryList) {
+            totalQuantity += this.state[prop]
+          }
+        }
       }
+      result['TOTAL'] = totalQuantity
       return result
 
     } catch (err) {
@@ -52,7 +69,6 @@ export class StockState {
 
   /**
    * Determine if the stock state has all the stock in the stock list given
-   * @param  {Object}       stockState the stock state
    * @param  {Array<Stock>} stockList  a list of stocks from an order
    * @return {boolean}                 if the stock state contains the stocks
    */
@@ -88,9 +104,7 @@ export class StockState {
   }
 
   /**
-   * Determine the stock of a place at a given date
-   * @param  {number}          placeId the id of the place
-   * @param  {Date}            date    the date when we want the stock state
+   * Determine the stock of the place at a given date
    * @return {Promise<Object>}         the stock state
    */
   private async calculateStockState (): Promise<Object> {

@@ -8,21 +8,32 @@ import {categoryTest} from './categoryTest'
 import {placeTest} from './placeTest'
 import {orderTest} from './orderTest'
 
+// let database: DatabaseObject
+
 describe('Database Test', () => {
 
-  let database: DatabaseObject
-
   // initialize the connection to the database for the tests
-  before(function (done: MochaDone): void  {
-    initDatabase('test')
-    .then((obj) => database = obj)
-    .catch((err) => { throw err })
-    .then(() => done())
-  })
+  // beforeEach(function (done: MochaDone): void  {
+  //   initDatabase('test')
+  //   .then((obj) => database = obj)
+  //   .catch(err => done(err))
+  //   .then(() => done())
+  // })
+  //
+  // after(function (done: MochaDone): void  {
+  //   database.connection.close()
+  //   done()
+  // })
 
-  // model tests
-  userTest(database)
-  categoryTest(database)
-  placeTest(database)
-  orderTest(database)
+  it('Model Tests', (done: MochaDone) => {
+    initDatabase('test')
+    .then((database) => {
+      userTest(database)
+      categoryTest(database)
+      placeTest(database)
+      orderTest(database)
+      done()
+    })
+    // .then(() => database.connection.close())
+  })
 })

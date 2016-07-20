@@ -1,6 +1,7 @@
 /**
  * List of users of the application
  */
+import {User} from 'app/type/model.d.ts'
 import * as mongoose from 'mongoose'
 import * as bcrypt from 'bcryptjs'
 import * as autoIncr from 'mongoose-auto-increment'
@@ -46,7 +47,7 @@ UserSchema.pre('save', function (next: Function): void {
   })
 })
 
-// cascade delete of orders
+// block delete if he is in some orders
 UserSchema.pre('remove', function (next: Function): void {
   OrderModel.find({ userId: this._id }).exec()
   .then((documents) => {
@@ -57,3 +58,28 @@ UserSchema.pre('remove', function (next: Function): void {
     }
   })
 })
+
+/**
+ * Compare search for a corresponding user in the database
+ * @param  {string}           pass  the user's password
+ * @param  {string}           email the user's email
+ * @return {Promise<boolean>}       true if this user exists. false if not
+ */
+export async function exists (pass: string, email: string): Promise<boolean> {
+  try {
+    let user = await UserModel.findOne({ email: email }).exec()
+
+    return new Promise<boolean>((resolve, reject) => {
+      bcrypt.compare(pass, user.get('password'), (err, isMatching) => {
+        if (isMatching) {
+          resolve(true)
+        } else {
+          resolve(false)
+        }
+      })
+    })
+
+  } catch (err) {
+    throw err
+  }
+}

@@ -15,7 +15,7 @@ model: mongoose.Model<mongoose.Document>): void {
   schema.path(idField).validate((value, next) => {
     model.findOne({ _id: value }).exec()
     .then((document) => {
-      if (! document) {
+      if (!document) {
         next(false)
       } else {
         next(true)
