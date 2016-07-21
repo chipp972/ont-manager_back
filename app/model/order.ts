@@ -68,6 +68,8 @@ checkRef(OrderSchema, 'placeIdSource', PlaceModel)
 // validate reference (the field)
 OrderSchema.path('reference').validate((value, next) => {
   let order = this
+  console.log(value)
+  console.log(order.reservation)
 
   // check if it's a reservation when there is no reference
   if (! value) {
@@ -76,5 +78,7 @@ OrderSchema.path('reference').validate((value, next) => {
     } else {
       next(true)
     }
+  } else {
+    next(true)
   }
 }, 'reference is not valid')

@@ -1,6 +1,8 @@
 {
   "name": "ont-manager_back",
-  "dependencies": {},
+  "dependencies": {
+    "mongodb": "registry:npm/mongodb#2.1.0+20160720065455"
+  },
   "ambientDependencies": {
     "es6-shim": "github:DefinitelyTyped/DefinitelyTyped/es6-shim/es6-shim.d.ts#7de6c3dd94feaeb21f20054b9f30d5dabc5efabd"
   },

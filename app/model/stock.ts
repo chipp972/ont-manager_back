@@ -17,4 +17,4 @@ export let StockSchema = new mongoose.Schema({
 StockSchema.plugin(autoIncr.plugin, modelName)
 
 // reference validation
-checkRef(StockSchema, 'categoryId', CategoryModel)
+// checkRef(StockSchema, 'categoryId', CategoryModel)
