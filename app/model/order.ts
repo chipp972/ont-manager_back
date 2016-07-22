@@ -38,17 +38,20 @@ OrderSchema.pre('save', function (next: Function): void {
   PlaceModel.findOne({ _id: order.placeIdSource }).exec()
   .then((sourcePlace) => {
     if (sourcePlace.get('internalStock')) { // verification needed
-      let errMsg2 = 'Not enough stock in source place'
+      let errMsg2 = `Not enough stock in place: ${sourcePlace.get('name')}`
       let placeId = sourcePlace.get('_id')
       order.date = order.date || new Date()
 
       let placeStockState = new StockState(placeId, order.date)
-      if (placeStockState.hasEnoughStock(order.stock)) {
-        console.log(placeStockState.toObject)
-        next()
-      } else {
-        next(new Error(errMsg2))
-      }
+
+      placeStockState.hasEnoughStock(order.stock)
+      .then((hasEnough) => {
+        if (hasEnough) {
+          next()
+        } else {
+          next(new Error(errMsg2))
+        }
+      })
 
     } else {
       next() // no need for verification since the source is external

@@ -1,5 +1,6 @@
 # Stockman API
 Restful API for back-end requests for Stockman app
+Coded in typescript
 
 valid operations
 GET /
