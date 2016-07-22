@@ -60,6 +60,7 @@ export interface User {
 export interface Order {
   _id: number
   date: Date
+  delivered: Boolean
   file?: Array<File>,
   placeIdSource: number
   placeIdDestination: number

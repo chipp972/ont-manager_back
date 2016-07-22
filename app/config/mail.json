@@ -1,0 +1,8 @@
+[
+  {
+    "name": "mailsender",
+    "user": "stockman.auto",
+    "password": "Covage01",
+    "logfile": "../../log/mail.log"
+  }
+]

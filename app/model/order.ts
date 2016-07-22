@@ -12,6 +12,7 @@ const modelName = 'Order'
 
 export let OrderSchema = new mongoose.Schema({
   date: Date,
+  delivered: { default: false, type: Boolean },
   file: [{
     contentType: { required: true, type: String},
     data: { required: true, type: Buffer},

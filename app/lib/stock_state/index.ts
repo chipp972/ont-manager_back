@@ -43,8 +43,8 @@ export class StockState {
 
       for (let prop in this.state) {
         let tmp = /(\d+)_(\d+)/.exec(prop)
-        let id = tmp[0]
-        let price = tmp[1]
+        let id = tmp[1]
+        let price = tmp[2]
 
         if (! categoryList ||
         (categoryList && categoryList.indexOf(Number(id)) !== -1)) {

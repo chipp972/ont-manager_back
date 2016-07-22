@@ -41,6 +41,7 @@
     "mongoose": "^4.4.20",
     "mongoose-auto-increment": "^5.0.1",
     "multer": "^1.1.0",
+    "nodemailer": "^2.5.0",
     "winston": "^2.2.0"
   }
 }

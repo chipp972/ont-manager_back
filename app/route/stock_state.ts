@@ -12,7 +12,7 @@ export function getStockStateRoutes(model: DatabaseObject): Router {
     let stockState = new StockState(placeId)
 
     stockState.toObject()
-    .then(obj => response.status(200).json(JSON.stringify(obj)))
+    .then(obj => response.status(200).json(obj))
     .catch(err => response.status(500).send(err))
 
   })
