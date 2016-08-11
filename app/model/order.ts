@@ -66,7 +66,7 @@ OrderSchema.pre('save', function (next: Function): void {
 
 // check for user alerts on the stock
 OrderSchema.post('save', (order) => {
-  alertCheck(order)
+  // alertCheck(order)
 })
 
 // reference validations

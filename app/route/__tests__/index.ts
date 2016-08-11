@@ -6,15 +6,15 @@
 
 describe('Server Test', () => {
 
-  let req: request.SuperTest
-
-  // initialize the connection to the database for the tests
-  before(function (done: MochaDone): void  {
-    initServer('dev', 'dev')
-    .then((server) => req = request(server))
-    .catch((err) => { throw err })
-    .then(() => done())
-  })
+  // let req: request.SuperTest<T>
+  //
+  // // initialize the connection to the database for the tests
+  // before(function (done: MochaDone): void  {
+  //   initServer('dev', 'dev')
+  //   .then((server) => req = request(server))
+  //   .catch((err) => { throw err })
+  //   .then(() => done())
+  // })
 
   //   describe('Post user', () => {
   //     it('should post a user', () => {

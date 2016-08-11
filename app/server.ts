@@ -6,7 +6,7 @@ import {initDatabase} from './model'
 import {generateRoutes} from './route'
 
 export let initServer =
-  async function (sconf?: string, dconf?: string): Promise<express.Express> {
+  async function (sconf?: string, dconf?: string): Promise<express.Application> {
   try {
     let serverConfigName = sconf || 'dev'
     let databaseConfigName = dconf || 'dev'

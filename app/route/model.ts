@@ -1,9 +1,9 @@
 import {DatabaseObject} from 'app/type/model.d.ts'
-import {Express, Router} from 'express'
+import {Router, Application} from 'express'
 import * as bodyParser from 'body-parser'
 import * as multer from 'multer'
 
-export function getModelRoutes(app: Express, model: DatabaseObject): Router {
+export function getModelRoutes(app: Application, model: DatabaseObject): Router {
   app.use(bodyParser.json())
   app.use(bodyParser.urlencoded({ extended: true }))
 
