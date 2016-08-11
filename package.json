@@ -4,15 +4,15 @@
   "description": "Restful API for back-end requests about ONT stock manager",
   "main": "dist/app.js",
   "scripts": {
-    "postinstall": "typings install",
-    "prestart": "tsc && node dist/scripts/app_config.js",
+    "postinstall": "sh scripts/install.sh",
+    "prestart": "sh scripts/install.sh",
     "start": "nodemon dist/app/app.js",
     "test": "tsc && sh scripts/start_tests.sh",
     "lint": "tslint -c tslint.json app/**/*.ts"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chipp972/ont-manager_back.git"
+    "url": "git+https://github.com/chipp972/stock_manager_api.git"
   },
   "keywords": [],
   "author": "",
