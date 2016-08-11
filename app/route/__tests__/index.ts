@@ -10,7 +10,7 @@ describe('Server Test', () => {
 
   // initialize the connection to the database for the tests
   before(function (done: MochaDone): void  {
-    initServer('test', 'test')
+    initServer('dev', 'dev')
     .then((server) => req = request(server))
     .catch((err) => { throw err })
     .then(() => done())

@@ -1,11 +1,10 @@
 [
   {
     "name": "dev",
-    "host": "172.16.128.101",
+    "host": "127.0.0.1",
     "port": 27017,
     "database": "dev_stock_manager",
     "type": "mongodb",
-    "promiseLibrary": "global.Promise",
     "logfile": "./log/dev-db.log"
   }, {
     "name": "prod",
@@ -15,7 +14,6 @@
     "pass": "Covage01",
     "database": "stock_manager",
     "type": "mongodb",
-    "promiseLibrary": "global.Promise",
     "logfile": "./log/db.log"
   }
 ]
