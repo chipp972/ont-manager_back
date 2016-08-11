@@ -1,0 +1,37 @@
+{
+  "apps": [
+    {
+      "name"      : "Stockman_API",
+      "script"    : "dist/app.js",
+      "instances" : "max",
+      "exec_mode" : "cluster",
+      "env": {
+        "COMMON_VARIABLE": "true"
+      },
+      "env_production" : {
+        "NODE_ENV": "production"
+      }
+    }
+  ],
+  "deploy" : {
+    "production" : {
+      "user" : "root",
+      "host" : "172.16.128.101",
+      "ref"  : "origin/master",
+      "repo" : "https://github.com/chipp972/stock_manager_api.git",
+      "path" : "/home/admin/stockman/api",
+      "post-deploy" : "npm install && pm2 startOrRestart ecosystem.json --env production"
+    },
+    "dev" : {
+      "user" : "opstats",
+      "host" : "127.0.0.1",
+      "ref"  : "origin/master",
+      "repo" : "https://github.com/chipp972/stock_manager_api.git",
+      "path" : "/home/Documents/stockman_api",
+      "post-deploy" : "npm install && pm2 startOrRestart ecosystem.json --env development",
+      "env"  : {
+        "NODE_ENV": "development"
+      }
+    }
+  }
+}
