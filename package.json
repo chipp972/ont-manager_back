@@ -15,13 +15,13 @@
     "url": "git+https://github.com/chipp972/stock_manager_api.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Pierre-charles Nicolas",
   "license": "MIT",
   "private": "true",
   "bugs": {
-    "url": "https://github.com/chipp972/ont-manager_back/issues"
+    "url": "https://github.com/chipp972/stock_manager_api/issues"
   },
-  "homepage": "https://github.com/chipp972/ont-manager_back#readme",
+  "homepage": "https://github.com/chipp972/stock_manager_api#readme",
   "devDependencies": {
     "chai": "^3.5.0",
     "mocha": "^2.5.3",
