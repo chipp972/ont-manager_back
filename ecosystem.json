@@ -18,14 +18,14 @@
       "ref"  : "origin/master",
       "repo" : "https://github.com/chipp972/stock_manager_api.git",
       "path" : "/home/admin/stockman/api",
-      "post-deploy" : "sudo npm install --unsafe-perm && pm2 startOrRestart ecosystem.json --env production"
+      "post-deploy" : "npm install && pm2 startOrRestart ecosystem.json --env production"
     },
     "dev" : {
-      "user" : "npcharles",
+      "user" : "chipp",
       "host" : "127.0.0.1",
       "ref"  : "origin/master",
       "repo" : "https://github.com/chipp972/stock_manager_api.git",
-      "path" : "/home/npcharles/Documents/deploy_dev/stockman",
+      "path" : "/home/chipp/Documents/deploy_test",
       "post-deploy" : "npm install && pm2 startOrRestart ecosystem.json --env development",
       "env"  : {
         "NODE_ENV": "development"
