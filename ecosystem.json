@@ -2,7 +2,7 @@
   "apps": [
     {
       "name"      : "Stockman_API",
-      "script"    : "dist/app.js",
+      "script"    : "dist/app/app.js",
       "env": {
         "COMMON_VARIABLE": "true"
       },
