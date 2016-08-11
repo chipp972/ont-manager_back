@@ -1,7 +1,7 @@
 {
-  "name": "stock-manager_back",
+  "name": "stockman_api",
   "version": "1.0.0",
-  "description": "Restful API for back-end requests about ONT stock manager",
+  "description": "Restful API for back-end requests of stockman",
   "main": "dist/app.js",
   "scripts": {
     "postinstall": "sh scripts/install.sh",
