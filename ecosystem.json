@@ -28,7 +28,7 @@
       "ref"  : "origin/master",
       "repo" : "https://github.com/chipp972/stock_manager_api.git",
       "path" : "/home/npcharles/Documents/deploy_dev/stockman",
-      "post-deploy" : "npm install && pm2 startOrRestart ecosystem.json --env development",
+      "post-deploy" : "sudo npm install --unsafe-perm  && pm2 startOrRestart ecosystem.json --env development",
       "env"  : {
         "NODE_ENV": "development"
       }
