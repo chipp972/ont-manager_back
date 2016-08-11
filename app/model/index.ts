@@ -29,8 +29,9 @@ Promise<DatabaseObject> {
     let uri: string
     uri = `${config.type}://${config.host}:${config.port}/${config.database}`
 
-    let dbObjPromise = new Promise<DatabaseObject>((resolve, reject) => {
+    return new Promise<DatabaseObject>((resolve, reject) => {
       mongoose.connect(uri, config)
+
       mongoose.connection.once('connected', () => {
         logger.info('database connection: success')
 
@@ -45,7 +46,7 @@ Promise<DatabaseObject> {
 
       mongoose.connection.on('error', (err) => {
         logger.error(`database error: ${err}`)
-        if (! dbObjPromise.isFulfilled) {
+        if (! this.isResolved) {
           reject(err)
         }
       })
@@ -54,8 +55,6 @@ Promise<DatabaseObject> {
         logger.debug('database connection: ended')
       })
     })
-
-    return dbObjPromise
 
   } catch (err) {
     throw err

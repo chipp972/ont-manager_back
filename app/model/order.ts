@@ -12,7 +12,7 @@ const modelName = 'Order'
 
 export let OrderSchema = new mongoose.Schema({
   date: Date,
-  delivered: { default: false, type: Boolean },
+  deliveryDate: Date,
   file: [{
     contentType: { required: true, type: String},
     data: { required: true, type: Buffer},
@@ -21,6 +21,7 @@ export let OrderSchema = new mongoose.Schema({
   }],
   placeIdDestination: { ref: 'Place', required: true, type: Number },
   placeIdSource: { ref: 'Place', required: true, type: Number },
+  receivedStock: [StockSchema],
   reference: String,
   reservation: { default: false, type: Boolean },
   stock: [StockSchema],
@@ -34,6 +35,10 @@ export let OrderModel = mongoose.model('Order', OrderSchema)
 // check if the stock required is present in the source
 OrderSchema.pre('save', function (next: Function): void {
   let order = this
+
+  if (!order.receivedStock) {
+    order.receivedStock = []
+  }
 
   PlaceModel.findOne({ _id: order.placeIdSource }).exec()
   .then((sourcePlace) => {

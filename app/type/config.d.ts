@@ -2,6 +2,7 @@ interface Config {
   name: string
   user?: string
   password?: string
+  pass?: string
   logfile: string
 }
 
@@ -19,5 +20,6 @@ export interface DatabaseConfig extends Config {
   port: number
   database: string
   type: DatabaseType
+  promiseLibrary?: string
   file?: string // filepath of the database for sqlite only
 }

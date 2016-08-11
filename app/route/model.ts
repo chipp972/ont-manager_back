@@ -57,7 +57,10 @@ export function getModelRoutes(app: Express, model: DatabaseObject): Router {
         .set('Access-Control-Allow-Origin', '*')
         .json(dbObj)
       })
-      .catch(err => response.status(403).send(err))
+      .catch(err => {
+        console.log(err)
+        response.status(403).send(err)
+      })
     }
   })
 
@@ -85,11 +88,12 @@ export function getModelRoutes(app: Express, model: DatabaseObject): Router {
     model[name].findById(id)
     .then((obj) => {
       // update object
-      for (let prop in obj) {
-        if (updatedObj.hasOwnProperty(prop)) {
+      for (let prop in updatedObj) {
+        if (obj.get(prop) !== undefined) {
           obj[prop] = updatedObj[prop]
         }
       }
+
       // save the new object in the database and send it in the response
       obj.save()
       .then((newObj) => {

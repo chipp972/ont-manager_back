@@ -1,8 +1,8 @@
 import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
 
-import {checkRef} from './utils'
-import {CategoryModel} from './category'
+// import {checkRef} from './utils'
+// import {CategoryModel} from './category'
 
 const modelName = 'Stock'
 

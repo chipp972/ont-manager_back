@@ -18,6 +18,12 @@ export interface Category {
   upperCategoryId?: number
 }
 
+export interface ProductCode {
+  _id: number
+  code: string
+  categoryId: number
+}
+
 export interface Stock {
   _id: number
   categoryId: number
@@ -39,6 +45,7 @@ export interface Place {
   address?: string
   description?: string
   internalStock: boolean
+  productCodeList: Array<ProductCode>
 }
 
 export interface Alert {
@@ -60,12 +67,13 @@ export interface User {
 export interface Order {
   _id: number
   date: Date
-  delivered: Boolean
+  deliveryDate?: Date
+  receivedStock?: Array<Stock>
   file?: Array<File>,
   placeIdSource: number
   placeIdDestination: number
   reference?: string
-  stock: Array<Stock>
+  stock?: Array<Stock>
   userId: number
   reservation: boolean
 }

@@ -118,7 +118,7 @@ export class StockState {
       }).exec()
 
       for (let currOrder of orderList) {
-        for (let stock of currOrder.get('stock')) {
+        for (let stock of currOrder.get('receivedStock')) {
           let key = `${stock.get('categoryId')}_${stock.get('unitPrice')}`
           if (stockState[key] !== undefined) {
             stockState[key] += stock.get('quantity')
@@ -139,7 +139,7 @@ export class StockState {
       }).exec()
 
       for (let currOrder of orderList) {
-        for (let stock of currOrder.get('stock')) {
+        for (let stock of currOrder.get('receivedStock')) {
           let key = `${stock.get('categoryId')}_${stock.get('unitPrice')}`
           if (stockState[key] !== undefined) {
             stockState[key] -= stock.get('quantity')

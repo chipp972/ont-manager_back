@@ -4,6 +4,7 @@
 import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
 import {OrderModel} from './order'
+import {ProductCodeSchema} from './product_code'
 
 const modelName = 'Place'
 
@@ -17,12 +18,18 @@ export let PlaceSchema = new mongoose.Schema({
     required: true,
     trim: true,
     type: String
-  }
+  },
+  productCodeList: [ProductCodeSchema]
 })
 
-// Plugins
-PlaceSchema.plugin(autoIncr.plugin, modelName)
-export let PlaceModel = mongoose.model(modelName, PlaceSchema)
+// hooks
+PlaceSchema.pre('save', (next) => {
+  let place = this
+  if (!place.productCodeList) {
+    place.productCodeList = []
+  }
+  next()
+})
 
 // block delete if orders with this placeId remains
 PlaceSchema.pre('remove', function (next: Function): void {
@@ -43,3 +50,7 @@ PlaceSchema.pre('remove', function (next: Function): void {
     }
   }, err => next(err))
 })
+
+// Plugins
+PlaceSchema.plugin(autoIncr.plugin, modelName)
+export let PlaceModel = mongoose.model(modelName, PlaceSchema)

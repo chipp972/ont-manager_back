@@ -3,30 +3,19 @@
     "name": "dev",
     "host": "172.16.128.101",
     "port": 27017,
-    "user": "nico",
-    "password": "covage",
     "database": "dev_stock_manager",
     "type": "mongodb",
+    "promiseLibrary": "global.Promise",
     "logfile": "./log/dev-db.log"
-  },
-  {
+  }, {
     "name": "prod",
     "host": "172.16.128.101",
     "port": 27017,
-    "user": "nico",
-    "password": "covage",
+    "user": "stockman",
+    "pass": "Covage01",
     "database": "stock_manager",
     "type": "mongodb",
-    "logfile": "./log/dev-db.log"
-  },
-  {
-    "name": "test",
-    "host": "172.16.128.101",
-    "port": 27017,
-    "user": "nico",
-    "password": "covage",
-    "database": "test_stock_manager",
-    "type": "mongodb",
-    "logfile": "./log/dev-db.log"
+    "promiseLibrary": "global.Promise",
+    "logfile": "./log/db.log"
   }
 ]
