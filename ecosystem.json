@@ -2,6 +2,7 @@
   "apps": [
     {
       "name"      : "Stockman_API",
+      "script"    : "dist/app.js",
       "instances" : "max",
       "exec_mode" : "cluster",
       "env": {
