@@ -13,9 +13,9 @@ const utils = require('./utils')
 
 let pathList = []
 let neededPathList = []
-prepathList.append(join(__dirname, '../log'))
-prepathList.append(join(__dirname, '../dist/node_modules'))
-prepathList.append(join(__dirname, '../node_modules'))
+neededPathList.push(join(__dirname, '../log'))
+neededPathList.push(join(__dirname, '../dist/node_modules'))
+neededPathList.push(join(__dirname, '../node_modules'))
 
 if (os.type() === 'Windows_NT') {
   pathList.push(join(__dirname, '..\\node_modules\\app'))

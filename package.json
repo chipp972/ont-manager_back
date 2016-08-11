@@ -7,9 +7,10 @@
     "postinstall": "typings install && node ./scripts/app_config.js && tsc",
     "prestart": "tsc",
     "start": "nodemon dist/app/app.js",
-    "test": "tsc && sh scripts/start_tests.sh",
+    "pretest": "tsc",
+    "test": "sh ./scripts/start_tests.sh",
     "lint": "tslint -c tslint.json app/**/*.ts",
-    "clean": "rm -rf node_modules/ dist/ typings/"
+    "clean": "rm -rf node_modules/ dist/ typings/ log/"
   },
   "repository": {
     "type": "git",
