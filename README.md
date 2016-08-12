@@ -17,4 +17,13 @@ mkdir /home/stockman
 adduser stockman (answer the questions) | make a script with useradd
 chown stockman /home/stockman
 chgrp stockman /home/stockman
+(ssh-keygen -t rsa)
+ssh-copy-id deploy_user@server_address
+pm2 deploy ecosystem.json prod setup
+pm2 deploy ecosystem.json prod
+```
+
+then to update:
+```
+pm2 deploy ecosystem.json prod update
 ```

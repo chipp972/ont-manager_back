@@ -2,10 +2,12 @@
  * Contains the type informations about the database object returned
  */
 import * as mongoose from 'mongoose'
+import {LoggerInstance} from 'winston'
 
 export interface DatabaseObject {
   connection: mongoose.Connection
   category: mongoose.Model<mongoose.Document>
+  logger: LoggerInstance
   order: mongoose.Model<mongoose.Document>
   place: mongoose.Model<mongoose.Document>
   user: mongoose.Model<mongoose.Document>

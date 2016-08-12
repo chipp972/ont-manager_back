@@ -1,12 +1,8 @@
 import {DatabaseObject} from 'app/type/model.d.ts'
-import {Router, Application} from 'express'
-import * as bodyParser from 'body-parser'
+import {Router} from 'express'
 import * as multer from 'multer'
 
-export function getModelRoutes(app: Application, model: DatabaseObject): Router {
-  app.use(bodyParser.json())
-  app.use(bodyParser.urlencoded({ extended: true }))
-
+export function getModelRoutes(model: DatabaseObject): Router {
   let router = Router()
   let upload = multer()
 
@@ -14,7 +10,8 @@ export function getModelRoutes(app: Application, model: DatabaseObject): Router 
   .get((request, response) => {
     let modelList: string[] = []
     for (let prop in model) {
-      if (model.hasOwnProperty(prop) && prop !== 'connection') {
+      if (model.hasOwnProperty(prop)
+      && (prop !== 'connection' || prop !== 'logger')) {
         modelList.push(prop)
       }
     }
@@ -89,9 +86,7 @@ export function getModelRoutes(app: Application, model: DatabaseObject): Router 
     .then((obj) => {
       // update object
       for (let prop in updatedObj) {
-        if (obj.get(prop) !== undefined) {
-          obj[prop] = updatedObj[prop]
-        }
+        obj[prop] = updatedObj[prop]
       }
 
       // save the new object in the database and send it in the response

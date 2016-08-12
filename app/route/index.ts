@@ -1,13 +1,13 @@
 import {DatabaseObject} from 'app/type/model.d.ts'
-import {Router, Application} from 'express'
+import {Router} from 'express'
 import {getModelRoutes} from './model'
 import {getStockStateRoutes} from './stock_state'
 
-export function generateRoutes(app: Application, model: DatabaseObject): Router {
+export function generateRoutes(model: DatabaseObject): Router {
   let router = Router()
 
   router.use(getStockStateRoutes(model))
-  router.use(getModelRoutes(app, model))
+  router.use(getModelRoutes(model))
 
   return router
 }

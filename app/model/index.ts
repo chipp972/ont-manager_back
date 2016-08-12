@@ -20,10 +20,12 @@ import {PlaceModel} from './place'
 import {UserModel} from './user'
 import {OrderModel} from './order'
 
-export async function initDatabase (configName: string):
-Promise<DatabaseObject> {
+export async function initDatabase (): Promise<DatabaseObject> {
   try {
-    let config = await getDatabaseConfig(configName)
+    let mode: string
+    process.env.NODE_ENV === 'production' ? mode = 'production' : mode = 'dev'
+
+    let config = await getDatabaseConfig(mode)
     let logger = getLogger(config.logfile)
 
     let uri: string
@@ -38,6 +40,7 @@ Promise<DatabaseObject> {
         resolve({
           category: CategoryModel,
           connection: mongoose.connection,
+          logger: logger,
           order: OrderModel,
           place: PlaceModel,
           user: UserModel

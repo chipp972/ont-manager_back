@@ -7,7 +7,7 @@
     "type": "mongodb",
     "logfile": "./log/dev-db.log"
   }, {
-    "name": "prod",
+    "name": "production",
     "host": "172.16.128.101",
     "port": 27017,
     "user": "stockman",
