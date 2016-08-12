@@ -15,11 +15,11 @@
   ],
   "deploy" : {
     "prod" : {
-      "user" : "root",
+      "user" : "stockman",
       "host" : "172.16.128.101",
       "ref"  : "origin/master",
       "repo" : "https://github.com/chipp972/stock_manager_api.git",
-      "path" : "/home/admin/stockman/api",
+      "path" : "/home/stockman/api",
       "post-deploy" : "npm install && pm2 startOrRestart ecosystem.json --env production"
     },
     "dev" : {
