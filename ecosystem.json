@@ -14,7 +14,7 @@
     }
   ],
   "deploy" : {
-    "production" : {
+    "prod" : {
       "user" : "root",
       "host" : "172.16.128.101",
       "ref"  : "origin/master",
