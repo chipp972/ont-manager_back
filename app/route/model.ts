@@ -89,9 +89,7 @@ export function getModelRoutes(app: Application, model: DatabaseObject): Router 
     .then((obj) => {
       // update object
       for (let prop in updatedObj) {
-        if (obj.get(prop) !== undefined) {
           obj[prop] = updatedObj[prop]
-        }
       }
 
       // save the new object in the database and send it in the response
