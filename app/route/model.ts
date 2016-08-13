@@ -1,72 +1,87 @@
-import {DatabaseObject} from 'app/type/model.d.ts'
+import {DatabaseObject} from '../type/model.d.ts'
 import {Router} from 'express'
-import * as multer from 'multer'
 
 export function getModelRoutes(model: DatabaseObject): Router {
   let router = Router()
-  let upload = multer()
+
+  let modelList: Array<string> = Object.keys(model).filter((e) => {
+    return (e !== 'connection' && e !== 'logger' && e !== 'tokenSalt')
+  })
 
   router.route('/') // list of models available
   .get((request, response) => {
-    let modelList: string[] = []
-    for (let prop in model) {
-      if (model.hasOwnProperty(prop)
-      && (prop !== 'connection' || prop !== 'logger')) {
-        modelList.push(prop)
-      }
-    }
-    response.status(200).json(modelList)
+    response
+    .status(200)
+    .json(modelList)
   })
 
-  router.route('/:model') // list of documents for this model
-  .get((request, response, next) => {
+  router.route('/:model')
+  .all((request, response, next) => {
     let name = request.params['model']
-    if (model[name]) {
-      model[name].find()
-      .then((objList) => {
-        response
-        .status(200)
-        .contentType('application/json')
-        .set('Access-Control-Allow-Origin', '*')
-        .json(objList)
+    if (modelList.indexOf(name) === -1) {
+      response
+      .status(404)
+      .json({
+        msg: `No model ${name} found`,
+        success: false
       })
-      .catch(err => response.status(404).send(err))
-    } else {
-      response.status(404).send(`no ${name} model`)
+      next()
     }
   })
-  .post(upload.array('files'), (request, response, next) => { // save a document
-    // note : the field name must be 'files'
+  .get((request, response) => { // list of documents for this model
+    let name = request.params['model']
+    model[name].find().exec()
+    .then((objList) => {
+      response
+      .status(200)
+      .contentType('application/json')
+      .set('Access-Control-Allow-Origin', '*')
+      .json(objList)
+    })
+    .catch(err => {
+      model.logger.error(err)
+      response.status(404).send(err)
+    })
+  })
+  .post((request, response) => { // save a document
     let name = request.params['model']
     let obj = new model[name](request.body)
 
-    if (!obj) {
-      response.status(404).send(`no ${name} model`)
-    } else {
-      obj.save()
-      .then((dbObj) => {
-        let uri = `http://${request.headers['host']}/${name}/${dbObj.id}`
+    obj.save()
+    .then((dbObj) => {
+      let uri = `http://${request.headers['host']}/${name}/${dbObj.id}`
 
-        response
-        .status(201)
-        .location(uri)
-        .contentType('application/json')
-        .set('Access-Control-Allow-Origin', '*')
-        .json(dbObj)
-      })
-      .catch(err => {
-        console.log(err)
-        response.status(403).send(err)
-      })
-    }
+      response
+      .status(201)
+      .location(uri)
+      .contentType('application/json')
+      .set('Access-Control-Allow-Origin', '*')
+      .json(dbObj)
+    })
+    .catch(err => {
+      model.logger.error(err)
+      response.status(403).send(err)
+    })
   })
 
   router.route('/:model/:id')
-  .get((request, response, next) => { // get a specific document
+  .all((request, response, next) => {
+    let name = request.params['model']
+    if (modelList.indexOf(name) === -1) {
+      response
+      .status(404)
+      .json({
+        msg: `No model ${name} found`,
+        success: false
+      })
+      next()
+    }
+  })
+  .get((request, response) => { // get a specific document
     let name = request.params['model']
     let id = request.params['id']
 
-    model[name].findById(id)
+    model[name].findById(id).exec()
     .then((obj) => {
       response
       .status(200)
@@ -74,15 +89,18 @@ export function getModelRoutes(model: DatabaseObject): Router {
       .set('Access-Control-Allow-Origin', '*')
       .json(obj)
     })
-    .catch(err => response.status(404).send(err))
+    .catch(err => {
+      model.logger.error(err)
+      response.status(404).send(err)
+    })
   })
-  .put((request, response, next) => { // update the model
+  .put((request, response) => { // update the model
     let name = request.params['model']
     let id = request.params['id']
     let updatedObj = request.body // accepts only json
 
     // update the obj in the database
-    model[name].findById(id)
+    model[name].findById(id).exec()
     .then((obj) => {
       // update object
       for (let prop in updatedObj) {
@@ -98,17 +116,26 @@ export function getModelRoutes(model: DatabaseObject): Router {
         .set('Access-Control-Allow-Origin', '*')
         .json(newObj)
       })
-      .catch(err => response.status(500).send(err))
+      .catch(err => {
+        model.logger.error(err)
+        response.status(500).send(err)
+      })
     })
-    .catch(err => response.status(404).send(err))
+    .catch(err => {
+      model.logger.error(err)
+      response.status(404).send(err)
+    })
   })
-  .delete((request, response, next) => { // delete the model
+  .delete((request, response) => { // delete the model
     let name = request.params['model']
     let id = request.params['id']
 
     model[name].remove({ '_id': id })
     .then(() => response.status(204).send())
-    .catch(err => response.status(500).send(err))
+    .catch(err => {
+      model.logger.error(err)
+      response.status(500).send(err)
+    })
   })
 
   return router

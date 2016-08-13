@@ -5,7 +5,8 @@
     "port": 27017,
     "database": "dev_stock_manager",
     "type": "mongodb",
-    "logfile": "./log/dev-db.log"
+    "logfile": "./log/dev-db.log",
+    "tokenSalt": "covageDev"
   }, {
     "name": "production",
     "host": "172.16.128.101",
@@ -14,6 +15,7 @@
     "pass": "Covage01",
     "database": "stock_manager",
     "type": "mongodb",
-    "logfile": "./log/db.log"
+    "logfile": "./log/db.log",
+    "tokenSalt": "covageProd"
   }
 ]

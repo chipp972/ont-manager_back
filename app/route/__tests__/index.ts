@@ -1,7 +1,6 @@
 /**
  * Test the authentication and ressource access with supertest
  */
- import {initServer} from 'app/server'
  import * as request from 'supertest-as-promised'
 
 describe('Server Test', () => {

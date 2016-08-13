@@ -1,7 +1,7 @@
 /**
  * Calculate stock state
  */
-import {Stock, Place} from 'app/type//model.d.ts'
+import {Stock, Place} from '../../type//model.d.ts'
 import {PlaceModel} from '../../model/place'
 import {OrderModel} from '../../model/order'
 import {CategoryModel} from '../../model/category'

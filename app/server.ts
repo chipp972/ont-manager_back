@@ -6,7 +6,8 @@ import {generateRoutes} from './route'
 import * as helmet from 'helmet'
 import * as morgan from 'morgan'
 import * as bodyParser from 'body-parser'
-import * as multer from 'multer'
+import * as passport from 'passport'
+import {configurePassport} from './lib/auth'
 
 /**
  * Initialize the server with the database
@@ -33,33 +34,25 @@ export let initServer = async function (): Promise<express.Application> {
           // security
           app.use(helmet())
 
+          // authentication
+          app.use(passport.initialize())
+          configurePassport(database, passport)
+
           // others
           // app.use(morgan(logmode, { 'stream': logger.stream }))
           app.use(morgan(logmode))
           app.use(bodyParser.json())
-          app.use(bodyParser.urlencoded({ extended: true }))
-          app.use(multer)
+          app.use(bodyParser.urlencoded({ extended: false }))
 
           /* routes */
           app.use(generateRoutes(database))
 
           /* handlers */
-
-          // errror handler
-          app.use((err, request, response) => {
-            response.status(err.status || 500)
-            response.render('error', {
-              error: {},
-              message: err.message
-            })
-          })
-
           // database disconnection and SIGINT handlers
           database.connection.once('disconnected', () => {
             logger.info('server is down')
             process.exit(0)
           })
-
           process.once('SIGINT', () => {
             logger.info('Server is down')
             database.connection.close(() => {

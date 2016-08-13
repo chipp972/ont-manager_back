@@ -1,10 +1,10 @@
-import {DatabaseObject} from 'app/type/model.d.ts'
+import {DatabaseObject} from '../type/model.d.ts'
 
 import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
 
-import {getDatabaseConfig} from 'app/config'
-import {getLogger} from 'app/lib/logger'
+import {getDatabaseConfig} from '../config'
+import {getLogger} from '../lib/logger'
 
 // mongoose plugins initialization
 autoIncr.initialize(mongoose.connection) // auto increment
@@ -43,6 +43,7 @@ export async function initDatabase (): Promise<DatabaseObject> {
           logger: logger,
           order: OrderModel,
           place: PlaceModel,
+          tokenSalt: config.tokenSalt,
           user: UserModel
         })
       })

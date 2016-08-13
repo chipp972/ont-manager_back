@@ -1,6 +1,7 @@
 /**
  * List of sub categories of stock
  */
+import {Category} from '../type/model.d.ts'
 import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
 import {checkRef} from './utils'
@@ -22,7 +23,7 @@ export let CategorySchema = new mongoose.Schema({
 
 // Plugins
 CategorySchema.plugin(autoIncr.plugin, modelName)
-export let CategoryModel = mongoose.model(modelName, CategorySchema)
+export let CategoryModel = mongoose.model<Category>(modelName, CategorySchema)
 
 // validate upperCategoryId
 checkRef(CategorySchema, 'upperCategoryId', CategoryModel)

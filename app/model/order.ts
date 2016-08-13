@@ -1,6 +1,7 @@
 import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
 
+import {Order} from '../type/model.d.ts'
 import {checkRef} from './utils'
 import {StockSchema} from './stock'
 import {UserModel} from './user'
@@ -30,7 +31,7 @@ export let OrderSchema = new mongoose.Schema({
 
 // Plugins
 OrderSchema.plugin(autoIncr.plugin, modelName)
-export let OrderModel = mongoose.model('Order', OrderSchema)
+export let OrderModel = mongoose.model<Order>('Order', OrderSchema)
 
 // check if the stock required is present in the source
 OrderSchema.pre('save', function (next: Function): void {

@@ -1,4 +1,3 @@
-import * as http from 'http'
 import {getServerConfig} from './config'
 import {getLogger} from './lib/logger'
 import {initServer} from './server'

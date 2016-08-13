@@ -1,12 +1,12 @@
 /**
  * Starts all database tests on operations
  */
-import {DatabaseObject} from 'app/type/model.d.ts'
-import {initDatabase} from '../index'
-import {userTest} from './userTest'
+// import {DatabaseObject} from 'app/type/model.d.ts'
+// import {initDatabase} from '../index'
+// import {userTest} from './userTest'
 // import {categoryTest} from './categoryTest'
-import {placeTest} from './placeTest'
-import {orderTest} from './orderTest'
+// import {placeTest} from './placeTest'
+// import {orderTest} from './orderTest'
 
 // let database: DatabaseObject
 

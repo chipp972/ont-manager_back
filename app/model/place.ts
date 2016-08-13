@@ -1,6 +1,7 @@
 /**
  * places where the stocks are
  */
+import {Place} from '../type/model.d.ts'
 import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
 import {OrderModel} from './order'
@@ -53,4 +54,4 @@ PlaceSchema.pre('remove', function (next: Function): void {
 
 // Plugins
 PlaceSchema.plugin(autoIncr.plugin, modelName)
-export let PlaceModel = mongoose.model(modelName, PlaceSchema)
+export let PlaceModel = mongoose.model<Place>(modelName, PlaceSchema)

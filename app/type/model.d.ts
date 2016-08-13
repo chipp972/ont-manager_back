@@ -4,45 +4,32 @@
 import * as mongoose from 'mongoose'
 import {LoggerInstance} from 'winston'
 
-export interface DatabaseObject {
-  connection: mongoose.Connection
-  category: mongoose.Model<mongoose.Document>
-  logger: LoggerInstance
-  order: mongoose.Model<mongoose.Document>
-  place: mongoose.Model<mongoose.Document>
-  user: mongoose.Model<mongoose.Document>
-}
-
-export interface Category {
-  _id: number
+export interface Category extends mongoose.Document {
   name: string
   description?: string
   upperCategoryId?: number
 }
 
-export interface ProductCode {
-  _id: number
+export interface ProductCode extends mongoose.Schema {
   code: string
   categoryId: number
 }
 
-export interface Stock {
-  _id: number
+export interface Stock extends mongoose.Schema {
   categoryId: number
   quantity: number
   unitPrice: number
   description?: string
 }
 
-export interface File {
+export interface File extends mongoose.Schema {
   name: string
   contentType: string
   data: Buffer
   description?: string
 }
 
-export interface Place {
-  _id: number
+export interface Place extends mongoose.Document {
   name: string
   address?: string
   description?: string
@@ -50,24 +37,24 @@ export interface Place {
   productCodeList: Array<ProductCode>
 }
 
-export interface Alert {
-  _id: number
+export interface Alert extends mongoose.Schema {
   categoryId: number
   placeId: number
   threshold: number
   description?: string
 }
 
-export interface User {
-  _id: number
+export interface User extends mongoose.Document {
+  activated: boolean
   email: string
   password: string
   admin: boolean
   alertList?: Array<Alert>
+  comparePassword:
+  (password: string, cb: (err: Error, isMatch: boolean) => any) => any
 }
 
-export interface Order {
-  _id: number
+export interface Order extends mongoose.Document {
   date: Date
   deliveryDate?: Date
   receivedStock?: Array<Stock>
@@ -78,4 +65,14 @@ export interface Order {
   stock?: Array<Stock>
   userId: number
   reservation: boolean
+}
+
+export interface DatabaseObject {
+  connection: mongoose.Connection
+  logger: LoggerInstance
+  tokenSalt: string
+  category: mongoose.Model<Category>
+  order: mongoose.Model<Order>
+  place: mongoose.Model<Place>
+  user: mongoose.Model<User>
 }

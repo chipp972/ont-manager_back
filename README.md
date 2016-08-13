@@ -10,6 +10,17 @@ with model in category, order, place, user
 GET PUT DELETE /model/id
 GET /stock_state/placeId
 
+## authentication ##
+
+*   A user must first register doing a "post" on '/register' with email and password
+*   Then waits for someone to activate his account
+*   Then to navigate on the api this user must first authenticate sending a
+    request "post" on '/authenticate'. He will then receive a token.
+    The token must be passed in the header in the field 'token' to authenticate
+    this user for each request.
+*   The token is valid 1h
+Note: the user informations is in request.user in each authenticated requests.
+
 ## deployment
 
 ```

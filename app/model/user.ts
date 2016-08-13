@@ -1,7 +1,7 @@
 /**
  * List of users of the application
  */
-import {User} from 'app/type/model.d.ts'
+import {User} from '../type/model.d.ts'
 import * as mongoose from 'mongoose'
 import * as bcrypt from 'bcryptjs'
 import * as autoIncr from 'mongoose-auto-increment'
@@ -12,6 +12,7 @@ const SALT = 10
 const modelName = 'User'
 
 export let UserSchema = new mongoose.Schema({
+  activated: { default: false, type: Boolean },
   admin: { default: false, type: Boolean },
   alertList: [AlertSchema],
   email: {
@@ -26,25 +27,26 @@ export let UserSchema = new mongoose.Schema({
 
 // Plugins
 UserSchema.plugin(autoIncr.plugin, modelName)
-export let UserModel = mongoose.model(modelName, UserSchema)
 
-// hashing password
+// hooks
 UserSchema.pre('save', function (next: Function): void {
   let user = this
 
   // only hash the password if it has been modified or is new
-  if (!user.isModified('password')) { return next() }
+  if (user.isModified('password') || user.isNew) {
+    bcrypt.genSalt(SALT, (err1, salt) => {
+      if (err1) { return next(err1) }
 
-  bcrypt.genSalt(SALT, (err1, salt) => {
-    if (err1) { return next(err1) }
+      bcrypt.hash(user.password, salt, (err2, hash) => {
+        if (err2) { return next(err2) }
 
-    bcrypt.hash(user.password, salt, (err2, hash) => {
-      if (err2) { return next(err2) }
-
-      user.password = hash
-      next()
+        user.password = hash
+        next()
+      })
     })
-  })
+  } else {
+    next()
+  }
 })
 
 // block delete if he is in some orders
@@ -59,27 +61,15 @@ UserSchema.pre('remove', function (next: Function): void {
   })
 })
 
-/**
- * Compare search for a corresponding user in the database
- * @param  {string}           pass  the user's password
- * @param  {string}           email the user's email
- * @return {Promise<boolean>}       true if this user exists. false if not
- */
-export async function exists (pass: string, email: string): Promise<boolean> {
-  try {
-    let user = await UserModel.findOne({ email: email }).exec()
-
-    return new Promise<boolean>((resolve, reject) => {
-      bcrypt.compare(pass, user.get('password'), (err, isMatching) => {
-        if (isMatching) {
-          resolve(true)
-        } else {
-          resolve(false)
-        }
-      })
-    })
-
-  } catch (err) {
-    throw err
-  }
+// methods
+UserSchema.methods.comparePassword =
+function (candidatePassword: string, cb: (e: Error, b: boolean) => any): any {
+  bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
+    if (err) {
+      return cb(err, false)
+    }
+    return cb(undefined, isMatch)
+  })
 }
+
+export let UserModel = mongoose.model<User>(modelName, UserSchema)

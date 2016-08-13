@@ -21,4 +21,5 @@ export interface DatabaseConfig extends Config {
   database: string
   type: DatabaseType
   file?: string // filepath of the database for sqlite only
+  tokenSalt?: string
 }
