@@ -15,22 +15,24 @@ export function getModelRoutes(model: DatabaseObject): Router {
     .json(modelList)
   })
 
-  router.route('/:model')
-  .all((request, response, next) => {
+  router.all('/:model/:id?', (request, response, next) => {
     let name = request.params['model']
     if (modelList.indexOf(name) === -1) {
-      response
+      return response
       .status(404)
       .json({
         msg: `No model ${name} found`,
         success: false
       })
-      next()
     }
+    next()
   })
+
+  router.route('/:model')
   .get((request, response) => { // list of documents for this model
     let name = request.params['model']
-    model[name].find().exec()
+    console.log(name)
+    model[name].find({}).exec()
     .then((objList) => {
       response
       .status(200)
@@ -65,18 +67,6 @@ export function getModelRoutes(model: DatabaseObject): Router {
   })
 
   router.route('/:model/:id')
-  .all((request, response, next) => {
-    let name = request.params['model']
-    if (modelList.indexOf(name) === -1) {
-      response
-      .status(404)
-      .json({
-        msg: `No model ${name} found`,
-        success: false
-      })
-      next()
-    }
-  })
   .get((request, response) => { // get a specific document
     let name = request.params['model']
     let id = request.params['id']
