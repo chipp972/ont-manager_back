@@ -25,7 +25,7 @@ export function getAuthenticationRoutes(model: DatabaseObject): Router {
    * Check name and password against the database and provide a
    * token if authentication succeeded.
    */
-  router.post('/authenticate', (request, response) => {
+  router.post('/signin', (request, response) => {
     model.user.findOne({ email: request.body.email }).exec()
     .then((account) => {
       if (!account) {

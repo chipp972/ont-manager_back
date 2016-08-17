@@ -6,7 +6,7 @@ import {getAuthenticationRoutes} from './auth'
 
 export function generateRoutes(model: DatabaseObject): Router {
   let router = Router()
-  let routeList = ['model', 'stock_state', 'register', 'authenticate']
+  let routeList = ['model', 'stock_state', 'register', 'signin']
 
   router.get('/', (request, response) => {
     response
