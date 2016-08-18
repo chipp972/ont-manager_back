@@ -1,66 +1,61 @@
-import * as express from 'express'
 import {getServerConfig} from './config'
 import {getLogger} from './lib/logger'
-import {initDatabase} from './model'
-import {generateRoutes} from './route'
-import * as helmet from 'helmet'
-import * as morgan from 'morgan'
-import * as bodyParser from 'body-parser'
-import * as passport from 'passport'
-import {configurePassport} from './lib/auth'
+import {initAppAndDatabase} from './app'
+
+initServer()
 
 /**
- * Initialize the server with the database
- * @return {Promise<express.Application>} The express app initialized
+ * Start the server
  */
-export let initServer = async function (): Promise<express.Application> {
+async function initServer (): Promise<void> {
   try {
     /* config and logger init */
     let mode: string
-    let logmode: string
-    mode = process.env.NODE_ENV
-    mode === 'production' ? logmode = 'combined' : logmode = 'dev'
+    mode = process.env.NODE_ENV || 'development'
 
     let config = await getServerConfig(mode)
     let logger = getLogger(config.logfile)
 
     try {
-          // database and app init
-          let app = express()
-          let database = await initDatabase()
+      let appPlusDb = await initAppAndDatabase()
+      let app = appPlusDb.app
+      app.set('port', config.port)
 
-          /* express middlewares */
+      // Create HTTP server which listen on provided port
+      // and on all network interfaces.
+      let server = app.listen(config.port, config.host)
 
-          // security
-          app.use(helmet())
+      // Handle server errors
+      server.on('error', (err) => {
+        if (err.syscal !== 'listen') {
+          logger.error(err)
+          throw err
+        }
 
-          // authentication
-          app.use(passport.initialize())
-          configurePassport(database, passport)
+        let bind = `Port ${config.port}`
 
-          // others
-          // app.use(morgan(logmode, { 'stream': logger.stream }))
-          app.use(morgan(logmode))
-          app.use(bodyParser.json())
-          app.use(bodyParser.urlencoded({ extended: false }))
+        switch (err.code) {
+          case 'EACCES':
+            logger.error(`${bind} requires elevated privileges`)
+            process.exit(1)
+            break
+          case 'EADDRINUSE':
+            logger.error(`${bind} is already in use`)
+            process.exit(1)
+            break
+          default:
+            logger.error(err)
+            throw err
+        }
+      })
 
-          /* routes */
-          app.use(generateRoutes(database, logger))
+      server.on('listening', () => {
+        let addr = server.address()
+        let bind = typeof addr === 'string' ? `pipe ${addr}`
+        : `port ${addr.port}`
+        logger.info(`Server Listening on ${bind}`)
+      })
 
-          /* handlers */
-          // database disconnection and SIGINT handlers
-          database.connection.once('disconnected', () => {
-            logger.info('server is down')
-            process.exit(0)
-          })
-          process.once('SIGINT', () => {
-            logger.info('Server is down')
-            database.connection.close(() => {
-              process.exit(0)
-            })
-          })
-
-          return app
     } catch (err) {
       logger.error(err)
       throw err

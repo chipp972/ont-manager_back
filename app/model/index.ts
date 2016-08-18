@@ -23,7 +23,7 @@ import {OrderModel} from './order'
 export async function initDatabase (): Promise<DatabaseObject> {
   try {
     let mode: string
-    mode = process.env.NODE_ENV
+    mode = process.env.NODE_ENV || 'development'
 
     let config = await getDatabaseConfig(mode)
     let logger = getLogger(config.logfile)

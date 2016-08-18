@@ -1,3 +1,6 @@
+import * as express from 'express'
+import {DatabaseObject} from './model.d.ts'
+
 interface Config {
   name: string
   user?: string
@@ -22,4 +25,9 @@ export interface DatabaseConfig extends Config {
   type: DatabaseType
   file?: string // filepath of the database for sqlite only
   tokenSalt?: string
+}
+
+export interface AppPlusDatabase {
+  app: express.Application
+  database: DatabaseObject
 }

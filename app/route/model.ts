@@ -14,22 +14,41 @@ export function getModelRoutes(model: DatabaseObject): Router {
     res.status(200).json(modelList)
   })
 
-  router.route('/:model/:id?')
-  .all((req: Request, res: Response, next: NextFunction) => {
-    let name = req.params['model']
-    if (modelList.indexOf(name) === -1) {
+  // param middleware to get the name of the model or 404 error
+  router.param('model', (req, res, next, modelName) => {
+    if (modelList.indexOf(modelName) === -1) {
       return res.status(404).json({
-        message: `No model ${name} found`,
+        message: `No model ${modelName} found`,
         success: false
       })
     }
+    req['modelName'] = modelName
     next()
   })
 
+  // param middleware to retrieve the document
+  router.param('id', (req, res, next, id) => {
+    model[req['modelName']].findById(id).exec()
+    .then((obj) => {
+      if (!obj) {
+        return res.status(404).json({
+          message: `No corresponding document found in ${req['modelName']}`,
+          success: false
+        })
+      }
+      req['model'] = obj
+      next()
+    })
+    .catch((err) => {
+      model.logger.error(err)
+      handle500(res, err)
+    })
+  })
+
+  // request handlers for get and post
   router.route('/:model')
   .get((req: Request, res: Response, next: NextFunction) => { // list documents
-    let name = req.params['model']
-    model[name].find({}).exec()
+    model[req['modelName']].find({}).exec()
     .then((objList) => {
       res.status(200).contentType('application/json').json(objList)
     })
@@ -39,9 +58,7 @@ export function getModelRoutes(model: DatabaseObject): Router {
     })
   })
   .post((req: Request, res: Response, next: NextFunction) => { // create
-    let name = req.params['model']
-    let obj = new model[name](req['body'])
-
+    let obj = new model[req['modelName']](req['body'])
     obj.save()
     .then((dbObj) => {
       let uri = `http://${req.headers['host']}/${name}/${dbObj.id}`
@@ -54,45 +71,23 @@ export function getModelRoutes(model: DatabaseObject): Router {
     })
   })
 
+  // request handlers for get, put, patch and delete
   router.route('/:model/:id')
   .get((req: Request, res: Response, next: NextFunction) => {
-    let name = req.params['model']
-    let id = req.params['id']
-
-    model[name].findById(id).exec()
-    .then((obj) => {
-      if (!obj) { return next() }
-      res.status(200).contentType('application/json').json(obj)
-    })
-    .catch(err => {
-      model.logger.error(err)
-      return handle500(res, err)
-    })
+    res.status(200).contentType('application/json').json(req['model'])
   })
   .patch((req: Request, res: Response, next: NextFunction) => { // update
-    let name = req.params['model']
-    let id = req.params['id']
     let updatedObj = req['body'] // accepts only json
+    // update object
+    for (let prop in updatedObj) {
+      req['model'][prop] = updatedObj[prop]
+    }
 
-    // update the obj in the database
-    model[name].findById(id).exec()
-    .then((obj) => {
-      if (!obj) { return next() }
-      // update object
-      for (let prop in updatedObj) {
-        obj[prop] = updatedObj[prop]
-      }
-
-      // save the new object in the database and send it in the response
-      obj.save()
-      .then((newObj) => {
-        model.logger.info(`update: ${newObj}`)
-        res.status(200).contentType('application/json').json(newObj)
-      })
-      .catch(err => {
-        model.logger.error(err)
-        return handle500(res, err)
-      })
+    // save the new object in the database and send it in the response
+    req['model'].save()
+    .then((newObj) => {
+      model.logger.info(`update: ${newObj}`)
+      res.status(200).contentType('application/json').json(newObj)
     })
     .catch(err => {
       model.logger.error(err)
@@ -100,29 +95,15 @@ export function getModelRoutes(model: DatabaseObject): Router {
     })
   })
   .put((req: Request, res: Response, next: NextFunction) => { // update
-    let name = req.params['model']
-    let id = req.params['id']
     let updatedObj = req['body'] // accepts only json
+    // update object
+    updatedObj._id = req['model']._id
 
-    // update the obj in the database
-    model[name].findById(id).exec()
-    .then((obj) => {
-      if (!obj) { return next() }
-      // update object
-      for (let prop in obj) {
-        obj[prop] = updatedObj[prop]
-      }
-
-      // save the new object in the database and send it in the response
-      obj.save()
-      .then((newObj) => {
-        model.logger.info(`update: ${newObj}`)
-        return res.status(200).contentType('application/json').json(newObj)
-      })
-      .catch(err => {
-        model.logger.error(err)
-        return handle500(res, err)
-      })
+    // save the new object in the database and send it in the response
+    updatedObj.save()
+    .then((newObj) => {
+      model.logger.info(`update: ${newObj}`)
+      res.status(200).contentType('application/json').json(newObj)
     })
     .catch(err => {
       model.logger.error(err)
@@ -130,13 +111,10 @@ export function getModelRoutes(model: DatabaseObject): Router {
     })
   })
   .delete((req: Request, res: Response, next: NextFunction) => { // delete
-    let name = req.params['model']
-    let id = req.params['id']
-
-    model[name].findByIdAndRemove(id).exec()
-    .then((obj) => {
-      model.logger.info(`remove: ${obj}`)
-      return res.status(200).json(obj)
+    req['model'].remove().exec()
+    .then(() => {
+      model.logger.info(`remove: ${req['model']}`)
+      return res.status(200).json(req['model'])
     })
     .catch(err => {
       model.logger.error(err)

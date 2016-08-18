@@ -2,17 +2,17 @@
   "name": "stockman_api",
   "version": "1.0.0",
   "description": "Restful API for back-end requests of stockman",
-  "main": "dist/app/app.js",
+  "main": "dist/server.js",
   "scripts": {
     "postinstall": "typings install && node ./scripts/app_config.js && tsc",
-    "prestart": "tsc && cp ./app/config/*.json ./dist/app/config/",
-    "start": "NODE_ENV=development nodemon dist/app/app.js",
-    "preprod": "tsc",
-    "prod": "NODE_ENV=production nodemon dist/app/app.js",
-    "pretest": "tsc",
-    "test": "sh ./scripts/start_tests.sh",
+    "prestart": "tsc && cp ./app/config/*.json ./dist/config/",
+    "start": "NODE_ENV=development nodemon dist/server.js",
+    "preprod": "tsc && cp ./app/config/*.json ./dist/config/",
+    "prod": "NODE_ENV=production nodemon dist/server.js",
+    "pretest": "tsc && cp ./app/config/*.json ./dist/config/",
+    "test": "NODE_ENV=test sh ./scripts/start_tests.sh",
     "lint": "tslint -c tslint.json app/**/*.ts",
-    "clean": "rm -rf node_modules/ dist/ typings/ log/"
+    "clean": "rm -rf node_modules/ dist/ typings/"
   },
   "repository": {
     "type": "git",
@@ -31,7 +31,6 @@
     "mocha": "^2.5.3",
     "nodemon": "^1.9.2",
     "supertest": "^1.2.0",
-    "supertest-as-promised": "^3.1.0",
     "tslint": "^3.10.2"
   },
   "dependencies": {

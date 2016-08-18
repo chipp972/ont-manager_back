@@ -18,13 +18,12 @@ export function generateRoutes (model: DatabaseObject,
     .json(routeList)
   })
 
-  process.env.NODE_ENV === 'production'
-  ? router.use('/', getAuthenticationRoutes(model))
-  : serverLogger.info('authentication disabled in development')
+  process.env.NODE_ENV !== 'development'
+  ? serverLogger.info('authentication disabled in development')
+  : router.use('/', getAuthenticationRoutes(model))
 
   router.use('/model', getModelRoutes(model))
   router.use('/stock_state', getStockStateRoutes(model))
-
   router.use(getErrorHandlers(serverLogger))
 
   return router
