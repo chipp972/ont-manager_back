@@ -15,9 +15,9 @@ export function getAuthenticationRoutes(model: DatabaseObject): Router {
       password: req['body'].password
     })
     newUser.save()
-    .then((user) => {
-      model.logger.info(`create: ${user}`)
-      res.status(201).json(user)
+    .then((account) => {
+      model.logger.info(`create: ${account}`)
+      res.status(201).json(account)
     }, (err) => {
       model.logger.error(err)
       return handle500(res, err)

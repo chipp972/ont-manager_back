@@ -18,7 +18,7 @@ export function generateRoutes (model: DatabaseObject,
     .json(routeList)
   })
 
-  process.env.NODE_ENV !== 'development'
+  process.env.NODE_ENV === 'development'
   ? serverLogger.info('authentication disabled in development')
   : router.use('/', getAuthenticationRoutes(model))
 

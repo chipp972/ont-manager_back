@@ -40,7 +40,7 @@ export let initAppAndDatabase = async function (): Promise<AppPlusDatabase> {
           configurePassport(database, passport)
 
           // others
-          if (mode !== 'production') { app.use(morgan('dev')) }
+          if (mode === 'development') { app.use(morgan('dev')) }
           app.use(morgan(logmode, { 'stream': logger['morganStream'] }))
           app.use(bodyParser.json())
           app.use(bodyParser.urlencoded({ extended: false }))
