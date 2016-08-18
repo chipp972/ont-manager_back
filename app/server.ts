@@ -18,7 +18,7 @@ export let initServer = async function (): Promise<express.Application> {
     /* config and logger init */
     let mode: string
     let logmode: string
-    process.env.NODE_ENV === 'production' ? mode = 'production' : mode = 'dev'
+    mode = process.env.NODE_ENV
     mode === 'production' ? logmode = 'combined' : logmode = 'dev'
 
     let config = await getServerConfig(mode)
@@ -45,7 +45,7 @@ export let initServer = async function (): Promise<express.Application> {
           app.use(bodyParser.urlencoded({ extended: false }))
 
           /* routes */
-          app.use(generateRoutes(database))
+          app.use(generateRoutes(database, logger))
 
           /* handlers */
           // database disconnection and SIGINT handlers

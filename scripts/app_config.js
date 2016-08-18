@@ -35,13 +35,13 @@ for (let path of neededPathList) {
 }
 
 // create symlink for app in node_modules and dist/node_modules
-for (let path of pathList) {
-  fs.access(path, fs.R_OK, (err) => {
-    if (err && os.type() !== 'Windows_NT') {
-      mkdirp(path)
-      .then(() => utils.createSymLink(path))
-    } else {
-      utils.createSymLink(path)
-    }
-  })
-}
+// for (let path of pathList) {
+//   fs.access(path, fs.R_OK, (err) => {
+//     if (err && os.type() !== 'Windows_NT') {
+//       mkdirp(path)
+//       .then(() => utils.createSymLink(path))
+//     } else {
+//       utils.createSymLink(path)
+//     }
+//   })
+// }

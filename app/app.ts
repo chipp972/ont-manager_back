@@ -9,7 +9,7 @@ async function initApp (): Promise<void> {
   try {
     /* config and logger init */
     let mode: string
-    process.env.NODE_ENV === 'production' ? mode = 'production' : mode = 'dev'
+    mode = process.env.NODE_ENV
 
     let config = await getServerConfig(mode)
     let logger = getLogger(config.logfile)

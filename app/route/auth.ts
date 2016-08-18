@@ -1,23 +1,26 @@
 import {DatabaseObject} from '../type/model.d.ts'
-import {Router} from 'express'
+import {Router, Request, Response, NextFunction} from 'express'
 import * as jwt from 'jsonwebtoken'
 import * as passport from 'passport'
+import {handle500} from './error'
 
 export function getAuthenticationRoutes(model: DatabaseObject): Router {
   let router = Router()
 
   // route to add new accounts (not activated)
-  router.post('/register', (request, response) => {
+  router.route('/register')
+  .post((req: Request, res: Response, next: NextFunction) => {
     let newUser = new model.user({
-      email: request.body.email,
-      password: request.body.password
+      email: req['body'].email,
+      password: req['body'].password
     })
     newUser.save()
     .then((user) => {
-      response.status(201).json(user)
+      model.logger.info(`create: ${user}`)
+      res.status(201).json(user)
     }, (err) => {
       model.logger.error(err)
-      response.status(500).send(err)
+      return handle500(res, err)
     })
   })
 
@@ -25,46 +28,38 @@ export function getAuthenticationRoutes(model: DatabaseObject): Router {
    * Check name and password against the database and provide a
    * token if authentication succeeded.
    */
-  router.post('/signin', (request, response) => {
-    model.user.findOne({ email: request.body.email }).exec()
+  router.post('/signin', (req: Request, res: Response, next: NextFunction) => {
+    model.user.findOne({ email: req['body'].email }).exec()
     .then((account) => {
-      if (!account) {
-        response
-        .status(404)
-        .json({
-          msg: 'User not found.',
+      if (!account) { return next() }
+      if (!account.activated) {
+        return res.status(403).json({
+          message: 'Account not activated',
           success: false
         })
-      } else {
-        if (account.activated === false) {
-          return response.status(403).json({
-            msg: 'Account not activated',
+      }
+      account.comparePassword(req['body'].password, (err, isMatch) => {
+        if (!isMatch || err) {
+          res.status(401).json({
+            message: 'Authentication failed',
             success: false
           })
         }
-        account.comparePassword(request.body.password, (err, isMatch) => {
-          if (isMatch && !err) {
-            let opts: jwt.SignOptions = {}
-            opts.expiresIn = '1h'
-            let token = jwt.sign(account, model.tokenSalt, opts)
-            // send token
-            response.status(200).json({ success: true, token: token })
-          } else {
-            response
-            .status(404)
-            .json({
-              msg: 'Authentication failed. Wrong password.',
-              success: false
-            })
-          }
-        })
-      }
+        let opts: jwt.SignOptions = {}
+        opts.expiresIn = '1h'
+
+        let token = jwt.sign(account, model.tokenSalt, opts)
+        return res.status(200).json({ success: true, token: token })
+      })
+    }, (err) => {
+      model.logger.error(err)
+      return handle500(res, err)
     })
   })
 
-  // middleware to authenticate requests for other routes
-  router.use(passport.authenticate('jwt', { session: false}),
-    (request, response, next) => {
+  // middleware to authenticate reqs for other routes
+  router.use(passport.authenticate('jwt', { session: false }),
+    (req: Request, res: Response, next: NextFunction) => {
       next()
     }
   )

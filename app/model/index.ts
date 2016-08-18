@@ -6,13 +6,13 @@ import * as autoIncr from 'mongoose-auto-increment'
 import {getDatabaseConfig} from '../config'
 import {getLogger} from '../lib/logger'
 
+// mongoose promise change
+// tslint:disable
+mongoose.Promise = require('bluebird')
+// tslint:enable
+
 // mongoose plugins initialization
 autoIncr.initialize(mongoose.connection) // auto increment
-
-/**
- * TODO can't do it because of fail typings definition
- * mongoose.Promise = global.Promise
- */
 
 // models
 import {CategoryModel} from './category'
@@ -23,7 +23,7 @@ import {OrderModel} from './order'
 export async function initDatabase (): Promise<DatabaseObject> {
   try {
     let mode: string
-    process.env.NODE_ENV === 'production' ? mode = 'production' : mode = 'dev'
+    mode = process.env.NODE_ENV
 
     let config = await getDatabaseConfig(mode)
     let logger = getLogger(config.logfile)

@@ -1,6 +1,6 @@
 [
   {
-    "name": "dev",
+    "name": "development",
     "host": "127.0.0.1",
     "port": 8001,
     "logfile": "./log/dev-server.log"

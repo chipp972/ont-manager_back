@@ -1,32 +1,31 @@
 import {DatabaseObject} from '../type/model.d.ts'
 import {Router} from 'express'
+import {LoggerInstance} from 'winston'
 import {getModelRoutes} from './model'
 import {getStockStateRoutes} from './stock_state'
 import {getAuthenticationRoutes} from './auth'
+import {getErrorHandlers} from './error'
 
-export function generateRoutes(model: DatabaseObject): Router {
+export function generateRoutes (model: DatabaseObject,
+  serverLogger: LoggerInstance): Router {
+
   let router = Router()
-  let routeList = ['model', 'stock_state', 'register', 'signin']
 
+  let routeList = ['model', 'stock_state', 'register', 'signin']
   router.get('/', (request, response) => {
     response
     .status(200)
     .json(routeList)
   })
 
-  router.use('/', getAuthenticationRoutes(model))
-  router.use('/stock_state', getStockStateRoutes(model))
-  router.use('/model', getModelRoutes(model))
+  process.env.NODE_ENV === 'production'
+  ? router.use('/', getAuthenticationRoutes(model))
+  : serverLogger.info('authentication disabled in development')
 
-  // handle 404 not found
-  router.use((request, response) => {
-    response
-    .status(404)
-    .json({
-      msg: 'no route',
-      success: false
-    })
-  })
+  router.use('/model', getModelRoutes(model))
+  router.use('/stock_state', getStockStateRoutes(model))
+
+  router.use(getErrorHandlers(serverLogger))
 
   return router
 }

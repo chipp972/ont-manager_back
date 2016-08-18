@@ -1,7 +1,7 @@
 /**
  * Order model tests
  */
-import {DatabaseObject} from 'app/type/model.d.ts'
+import {DatabaseObject} from '../../type/model.d.ts'
 import {expect} from 'chai'
 
 let userMock = {
