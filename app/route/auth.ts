@@ -63,10 +63,9 @@ export function getAuthenticationRoutes(model: DatabaseObject): Router {
 
   // middleware to authenticate reqs for other routes
   router.use(passport.authenticate('jwt', { session: false }),
-    (req: Request, res: Response, next: NextFunction) => {
-      next()
-    }
-  )
+  (req: Request, res: Response, next: NextFunction) => {
+    next()
+  })
 
   return router
 }
