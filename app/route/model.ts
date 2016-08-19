@@ -61,9 +61,11 @@ export function getModelRoutes(model: DatabaseObject): Router {
     let obj = new model[req['modelName']](req['body'])
     obj.save()
     .then((dbObj) => {
-      let uri = `http://${req.headers['host']}/${name}/${dbObj.id}`
+      let uri = `http://${req.headers['host']}/${req['modelName']}/${dbObj._id}`
       model.logger.info(`create: ${dbObj}`)
-      res.status(201).location(uri).contentType('application/json').json(dbObj)
+      return res.status(201)
+      .location(uri)
+      .json(dbObj)
     })
     .catch(err => {
       model.logger.error(err)
