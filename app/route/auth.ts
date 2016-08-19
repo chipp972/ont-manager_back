@@ -28,7 +28,8 @@ export function getAuthenticationRoutes(model: DatabaseObject): Router {
    * Check name and password against the database and provide a
    * token if authentication succeeded.
    */
-  router.post('/signin', (req: Request, res: Response, next: NextFunction) => {
+  router.route('/signin')
+  .post((req: Request, res: Response, next: NextFunction) => {
     model.user.findOne({ email: req['body'].email }).exec()
     .then((account) => {
       if (!account) { return next() }
@@ -39,21 +40,24 @@ export function getAuthenticationRoutes(model: DatabaseObject): Router {
         })
       }
       account.comparePassword(req['body'].password, (err, isMatch) => {
-        if (!isMatch || err) {
-          res.status(401).json({
-            message: 'Authentication failed',
-            success: false
-          })
-        }
-        let opts: jwt.SignOptions = {}
-        opts.expiresIn = '1h'
-
+        if (err) { return handle500(res, err) }
+        if (!isMatch) { return next() }
+        let opts: jwt.SignOptions = { expiresIn: '1h' }
         let token = jwt.sign(account, model.tokenSalt, opts)
-        return res.status(200).json({ success: true, token: token })
+        return res.status(200).json({
+          success: true,
+          token: token
+        })
       })
     }, (err) => {
       model.logger.error(err)
       return handle500(res, err)
+    })
+  })
+  .post((req: Request, res: Response, next: NextFunction) => {
+    return res.status(401).json({
+      message: 'Authentication failed',
+      success: false
     })
   })
 
