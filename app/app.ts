@@ -61,7 +61,11 @@ export let initAppAndDatabase = async function (): Promise<AppPlusDatabase> {
             })
           })
 
-          return { app: app, database: database }
+          return {
+            app: app,
+            database: database,
+            logger: logger
+          }
     } catch (err) {
       logger.error(err)
       throw err

@@ -1,11 +1,9 @@
 /**
  * Calculate stock state
  */
-import {Stock, Place} from '../../type//model.d.ts'
-import {PlaceModel} from '../../model/place'
+import {Stock} from '../../type//model.d.ts'
 import {OrderModel} from '../../model/order'
 import {CategoryModel} from '../../model/category'
-import {getChildrenCategory} from './utils'
 
 export class StockState {
   private placeId: number
@@ -26,20 +24,13 @@ export class StockState {
    * get a stock state object in a more human readable state with category
    * names, unit prices for each category and quantity for each unit price
    * @param  {number}          [categoryId] limit the result to a category
-   *                                        and its children
    * @return {Promise<Object>}              the new stock state
    */
   public async toObject (categoryId?: number): Promise<Object> {
     try {
       this.state = this.state || await this.calculateStockState()
       let result: Object = {}
-      let totalQuantity: number = undefined
       let categoryList: Array<number> = undefined
-
-      if (categoryId) {
-        categoryList = await getChildrenCategory(categoryId)
-        totalQuantity = 0
-      }
 
       for (let prop in this.state) {
         let tmp = /(\d+)_(\d+)/.exec(prop)
@@ -53,13 +44,8 @@ export class StockState {
           let categoryName = category.get('name')
           result[categoryName] = result[categoryName] || {}
           result[categoryName][price] = this.state[prop]
-
-          if (categoryList) {
-            totalQuantity += this.state[prop]
-          }
         }
       }
-      result['TOTAL'] = totalQuantity
       return result
 
     } catch (err) {
@@ -89,18 +75,6 @@ export class StockState {
 
   public getPlaceId (): number {
     return this.placeId
-  }
-
-  /**
-   * @return {Promise<Object>} the place object
-   */
-  public async getPlace (): Promise<Place> {
-    try {
-      let place = await PlaceModel.findOne({ _id: this.placeId }).exec()
-      return place.toObject() as Place
-    } catch (err) {
-      throw err
-    }
   }
 
   /**

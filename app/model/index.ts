@@ -15,8 +15,11 @@ mongoose.Promise = require('bluebird')
 autoIncr.initialize(mongoose.connection) // auto increment
 
 // models
+import {AlertModel} from './alert'
+import {AttachmentModel} from './attachment'
 import {CategoryModel} from './category'
 import {PlaceModel} from './place'
+import {ProductCodeModel} from './product_code'
 import {UserModel} from './user'
 import {OrderModel} from './order'
 
@@ -38,11 +41,14 @@ export async function initDatabase (): Promise<DatabaseObject> {
         logger.info('database connection: success')
 
         resolve({
+          alert: AlertModel,
+          attachment: AttachmentModel,
           category: CategoryModel,
           connection: mongoose.connection,
           logger: logger,
           order: OrderModel,
           place: PlaceModel,
+          product_code: ProductCodeModel,
           tokenSalt: config.tokenSalt,
           user: UserModel
         })
@@ -56,7 +62,7 @@ export async function initDatabase (): Promise<DatabaseObject> {
       })
 
       mongoose.connection.on('disconnected', () => {
-        logger.debug('database connection: ended')
+        logger.info('database connection: ended')
       })
     })
 

@@ -3,12 +3,16 @@ import {initAppAndDatabase} from '../../app'
 import * as request from 'supertest'
 import * as chai from 'chai'
 
-export let authTests = () => {
+export function authTests (): any {
   let req: request.SuperTest<request.Test>
   let db: DatabaseObject
   let token: string
+  let testUser = {
+    email: 'root@covage.com',
+    password: 'a'
+  }
 
-  // initialize the connection to the database for the tests
+  // initialize the app for the tests
   before((done: MochaDone) => {
     initAppAndDatabase()
     .then((appPlusDb) => {
@@ -34,7 +38,7 @@ export let authTests = () => {
 
   describe('Register & Signin', () => {
 
-    it('should fail to access the page', (done: MochaDone) => {
+    it('should fail to access a protected page', (done: MochaDone) => {
       req.get('/model')
       .end((err, res) => {
         if (err) {
@@ -49,10 +53,7 @@ export let authTests = () => {
 
     it('should create a user', (done: MochaDone) => {
       req.post('/register')
-      .send({
-        email: 'root@covage.com',
-        password: 'a'
-      })
+      .send(testUser)
       .expect(201)
       .expect('Content-Type', /json/)
       .end((err, res) => {
@@ -81,10 +82,7 @@ export let authTests = () => {
 
     it('should get a token for the created user', (done: MochaDone) => {
       req.post('/signin')
-      .send({
-        email: 'root@covage.com',
-        password: 'a'
-      })
+      .send(testUser)
       .expect(200)
       .expect('Content-Type', /json/)
       .end((err, res) => {
@@ -100,7 +98,7 @@ export let authTests = () => {
       })
     })
 
-    it('should succeed to access the page', (done: MochaDone) => {
+    it('should succeed to access a protected the page', (done: MochaDone) => {
       req.get('/model')
       .set('token', token)
       .expect(200)
@@ -110,8 +108,9 @@ export let authTests = () => {
           console.log(err)
           return done(err)
         }
-        console.log(res.body)
-        // chai.expect(Object.keys(db)).to.include(res.body)
+        chai.expect(Object.keys(db).filter((e) => {
+          return e !== 'logger' && e !== 'connection' && e !== 'tokenSalt'
+        })).to.deep.equal(res.body)
         done()
       })
     })

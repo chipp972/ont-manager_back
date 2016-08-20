@@ -39,8 +39,8 @@ export function getAuthenticationRoutes(model: DatabaseObject): Router {
           success: false
         })
       }
-      account.comparePassword(req['body'].password, (err, isMatch) => {
-        if (err) { return handle500(res, err) }
+      account.comparePassword(req['body'].password)
+      .then((isMatch) => {
         if (!isMatch) { return next() }
         let opts: jwt.SignOptions = { expiresIn: '1h' }
         let token = jwt.sign(account, model.tokenSalt, opts)
@@ -48,6 +48,10 @@ export function getAuthenticationRoutes(model: DatabaseObject): Router {
           success: true,
           token: token
         })
+      })
+      .catch(err => {
+        model.logger.error(err)
+        return handle500(res, err)
       })
     }, (err) => {
       model.logger.error(err)
