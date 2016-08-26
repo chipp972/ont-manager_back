@@ -39,9 +39,11 @@ export let initAppAndDatabase = async function (): Promise<AppPlusDatabase> {
           app.use(passport.initialize())
           configurePassport(database, passport)
 
-          // others
+          // logs
           if (mode === 'development') { app.use(morgan('dev')) }
           app.use(morgan(logmode, { 'stream': logger['morganStream'] }))
+
+          // requests
           app.use(bodyParser.json())
           app.use(bodyParser.urlencoded({ extended: false }))
 
@@ -58,6 +60,18 @@ export let initAppAndDatabase = async function (): Promise<AppPlusDatabase> {
             logger.info('Server is down')
             database.connection.close(() => {
               process.exit(0)
+            })
+          })
+
+          // request error handler
+          app.use((err, req, res, next) => {
+            let stack: string
+            mode === 'development' ? stack = err.stack : stack = ''
+
+            return res.status(err['status'] || 500).json({
+              message: err.message,
+              stack: stack,
+              success: false
             })
           })
 

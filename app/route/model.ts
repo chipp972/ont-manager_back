@@ -1,6 +1,5 @@
 import {DatabaseObject} from '../type/model.d.ts'
 import {Router, Request, Response, NextFunction} from 'express'
-import {handle500} from './error'
 
 export function getModelRoutes(model: DatabaseObject): Router {
   let router = Router()
@@ -17,10 +16,9 @@ export function getModelRoutes(model: DatabaseObject): Router {
   // param middleware to get the name of the model or 404 error
   router.param('model', (req, res, next, modelName) => {
     if (modelList.indexOf(modelName) === -1) {
-      return res.status(404).json({
-        message: `No model ${modelName} found`,
-        success: false
-      })
+      let err = new Error(`No model ${modelName} found`)
+      err['status'] = 404
+      return next(err)
     }
     req['modelName'] = modelName
     next()
@@ -31,17 +29,16 @@ export function getModelRoutes(model: DatabaseObject): Router {
     model[req['modelName']].findById(id).exec()
     .then((obj) => {
       if (!obj) {
-        return res.status(404).json({
-          message: `No corresponding document found in ${req['modelName']}`,
-          success: false
-        })
+        let err = new Error(`No document with id ${id} in ${req['modelName']}`)
+        err['status'] = 404
+        return next(err)
       }
       req['model'] = obj
       next()
     })
     .catch((err) => {
       model.logger.error(err)
-      handle500(res, err)
+      next(err)
     })
   })
 
@@ -54,7 +51,7 @@ export function getModelRoutes(model: DatabaseObject): Router {
     })
     .catch(err => {
       model.logger.error(err)
-      return handle500(res, err)
+      return next(err)
     })
   })
   .post((req: Request, res: Response, next: NextFunction) => { // create
@@ -63,13 +60,11 @@ export function getModelRoutes(model: DatabaseObject): Router {
     .then((dbObj) => {
       let uri = `http://${req.headers['host']}/${req['modelName']}/${dbObj._id}`
       model.logger.info(`create: ${dbObj}`)
-      return res.status(201)
-      .location(uri)
-      .json(dbObj)
+      return res.status(201).location(uri).json(dbObj)
     })
     .catch(err => {
       model.logger.error(err)
-      return handle500(res, err)
+      return next(err)
     })
   })
 
@@ -93,7 +88,7 @@ export function getModelRoutes(model: DatabaseObject): Router {
     })
     .catch(err => {
       model.logger.error(err)
-      return handle500(res, err)
+      return next(err)
     })
   })
   .put((req: Request, res: Response, next: NextFunction) => { // update
@@ -109,18 +104,18 @@ export function getModelRoutes(model: DatabaseObject): Router {
     })
     .catch(err => {
       model.logger.error(err)
-      return handle500(res, err)
+      return next(err)
     })
   })
   .delete((req: Request, res: Response, next: NextFunction) => { // delete
     req['model'].remove().exec()
     .then(() => {
       model.logger.info(`remove: ${req['model']}`)
-      return res.status(200).json(req['model'])
+      return res.status(200).contentType('application/json').json(req['model'])
     })
     .catch(err => {
       model.logger.error(err)
-      return handle500(res, err)
+      return next(err)
     })
   })
 

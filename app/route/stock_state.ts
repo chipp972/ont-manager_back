@@ -1,7 +1,6 @@
 import {DatabaseObject} from '../type/model.d.ts'
 import {StockState} from '../lib/stock_state'
 import {Router, Request, Response, NextFunction} from 'express'
-import {handle500} from './error'
 
 export function getStockStateRoutes (model: DatabaseObject): Router {
   let router = Router()
@@ -11,7 +10,7 @@ export function getStockStateRoutes (model: DatabaseObject): Router {
     .then((documents) => {
       res.status(200).json(documents.map((e) => { return e._id }))
     }, (err) => {
-      handle500(res, err)
+      return next(err)
     })
   })
 
@@ -25,7 +24,7 @@ export function getStockStateRoutes (model: DatabaseObject): Router {
     .then(obj => res.status(200).json(obj))
     .catch(err => {
       model.logger.error(err)
-      return handle500(res, err)
+      return next(err)
     })
   })
 

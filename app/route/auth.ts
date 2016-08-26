@@ -2,7 +2,6 @@ import {DatabaseObject} from '../type/model.d.ts'
 import {Router, Request, Response, NextFunction} from 'express'
 import * as jwt from 'jsonwebtoken'
 import * as passport from 'passport'
-import {handle500} from './error'
 
 export function getAuthenticationRoutes(model: DatabaseObject): Router {
   let router = Router()
@@ -20,7 +19,7 @@ export function getAuthenticationRoutes(model: DatabaseObject): Router {
       res.status(201).json(account)
     }, (err) => {
       model.logger.error(err)
-      return handle500(res, err)
+      return next(err)
     })
   })
 
@@ -40,7 +39,7 @@ export function getAuthenticationRoutes(model: DatabaseObject): Router {
         })
       }
       account.comparePassword(req['body'].password, (err, isMatch) => {
-        if (err) { return handle500(res, err) }
+        if (err) { return next(err) }
         if (!isMatch) { return next() }
         let opts: jwt.SignOptions = { expiresIn: '1h' }
         let token = jwt.sign(account, model.tokenSalt, opts)
@@ -51,7 +50,7 @@ export function getAuthenticationRoutes(model: DatabaseObject): Router {
       })
     }, (err) => {
       model.logger.error(err)
-      return handle500(res, err)
+      return next(err)
     })
   })
   .post((req: Request, res: Response, next: NextFunction) => {
