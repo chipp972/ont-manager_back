@@ -7,31 +7,25 @@ import {StockSchema} from './stock'
 import {UserModel} from './user'
 import {PlaceModel} from './place'
 import {StockState} from '../lib/stock_state'
-import {alertCheck} from '../lib/alert'
 
 const modelName = 'Order'
+
+let states = [ 'reservation', 'delivered', 'sending', 'partial', 'cancel' ]
 
 export let OrderSchema = new mongoose.Schema({
   date: Date,
   deliveryDate: Date,
-  file: [{
-    contentType: { required: true, type: String},
-    data: { required: true, type: Buffer},
-    description: String,
-    name: { lowercase: true, required: true, trim: true, type: String}
-  }],
   placeIdDestination: { ref: 'Place', required: true, type: Number },
   placeIdSource: { ref: 'Place', required: true, type: Number },
   receivedStock: [StockSchema],
   reference: String,
-  reservation: { default: false, type: Boolean },
+  state: { default: false, enum: states, type: String },
   stock: [StockSchema],
   userId: { ref: 'User', required: true, type: Number }
 })
 
 // Plugins
 OrderSchema.plugin(autoIncr.plugin, modelName)
-export let OrderModel = mongoose.model<Order>('Order', OrderSchema)
 
 // check if the stock required is present in the source
 OrderSchema.pre('save', function (next: Function): void {
@@ -53,21 +47,22 @@ OrderSchema.pre('save', function (next: Function): void {
       placeStockState.hasEnoughStock(order.stock)
       .then((hasEnough) => {
         if (hasEnough) {
-          next()
+          return next()
         } else {
-          next(new Error(errMsg2))
+          return next(new Error(errMsg2))
         }
       })
 
     } else {
-      next() // no need for verification since the source is external
+      return next() // no need for verification since the source is external
     }
   }, (err) => next(err))
 })
 
 // check for user alerts on the stock
-OrderSchema.post('save', (order) => {
+OrderSchema.post('save', (order, next) => {
   // alertCheck(order)
+  next()
 })
 
 // reference validations
@@ -87,6 +82,15 @@ OrderSchema.path('reference').validate((value, next) => {
       next(true)
     }
   } else {
-    next(true)
+    next()
   }
 }, 'reference is not valid')
+
+/** function to compare stock and receivedStock
+ * if they are the same -> []
+ * else it will send an array with the stocks and the lacking quantity
+ */
+// OrderSchema.methods.compareStocks =
+// function ()
+
+export let OrderModel = mongoose.model<Order>(modelName, OrderSchema)

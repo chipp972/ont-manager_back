@@ -63,6 +63,7 @@ export let initAppAndDatabase = async function (): Promise<AppPlusDatabase> {
             })
           })
 
+<<<<<<< HEAD
           // request error handler
           app.use((err, req, res, next) => {
             let stack: string
@@ -76,6 +77,13 @@ export let initAppAndDatabase = async function (): Promise<AppPlusDatabase> {
           })
 
           return { app: app, database: database }
+=======
+          return {
+            app: app,
+            database: database,
+            logger: logger
+          }
+>>>>>>> 3011354d1c506354f0557147a571a12ba8813bad
     } catch (err) {
       logger.error(err)
       throw err

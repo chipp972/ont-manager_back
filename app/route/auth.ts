@@ -38,8 +38,13 @@ export function getAuthenticationRoutes(model: DatabaseObject): Router {
           success: false
         })
       }
+<<<<<<< HEAD
       account.comparePassword(req['body'].password, (err, isMatch) => {
         if (err) { return next(err) }
+=======
+      account.comparePassword(req['body'].password)
+      .then((isMatch) => {
+>>>>>>> 3011354d1c506354f0557147a571a12ba8813bad
         if (!isMatch) { return next() }
         let opts: jwt.SignOptions = { expiresIn: '1h' }
         let token = jwt.sign(account, model.tokenSalt, opts)
@@ -47,6 +52,10 @@ export function getAuthenticationRoutes(model: DatabaseObject): Router {
           success: true,
           token: token
         })
+      })
+      .catch(err => {
+        model.logger.error(err)
+        return handle500(res, err)
       })
     }, (err) => {
       model.logger.error(err)

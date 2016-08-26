@@ -1,5 +1,6 @@
 import * as express from 'express'
 import {DatabaseObject} from './model.d.ts'
+import {LoggerInstance} from 'winston'
 
 interface Config {
   name: string
@@ -30,4 +31,5 @@ export interface DatabaseConfig extends Config {
 export interface AppPlusDatabase {
   app: express.Application
   database: DatabaseObject
+  logger: LoggerInstance
 }

@@ -7,12 +7,12 @@ import {LoggerInstance} from 'winston'
 export interface Category extends mongoose.Document {
   name: string
   description?: string
-  upperCategoryId?: number
 }
 
-export interface ProductCode extends mongoose.Schema {
+export interface ProductCode extends mongoose.Document {
   code: string
   categoryId: number
+  placeId: number
 }
 
 export interface Stock extends mongoose.Schema {
@@ -22,10 +22,18 @@ export interface Stock extends mongoose.Schema {
   description?: string
 }
 
-export interface File extends mongoose.Schema {
+export interface Attachment extends mongoose.Document {
   name: string
   contentType: string
   data: Buffer
+  description?: string
+  orderId: number
+}
+
+export interface Alert extends mongoose.Document {
+  categoryId: number
+  placeId: number
+  threshold: number
   description?: string
 }
 
@@ -34,14 +42,9 @@ export interface Place extends mongoose.Document {
   address?: string
   description?: string
   internalStock: boolean
-  productCodeList: Array<ProductCode>
-}
 
-export interface Alert extends mongoose.Schema {
-  categoryId: number
-  placeId: number
-  threshold: number
-  description?: string
+  // methods
+  getStockState: () => Promise<Object>
 }
 
 export interface User extends mongoose.Document {
@@ -49,30 +52,33 @@ export interface User extends mongoose.Document {
   email: string
   password: string
   admin: boolean
-  alertList?: Array<Alert>
-  comparePassword:
-  (password: string, cb: (err: Error, isMatch: boolean) => any) => any
+
+  // methods
+  comparePassword: (password: string) => Promise<boolean>
 }
 
 export interface Order extends mongoose.Document {
   date: Date
   deliveryDate?: Date
   receivedStock?: Array<Stock>
-  file?: Array<File>,
   placeIdSource: number
   placeIdDestination: number
   reference?: string
   stock?: Array<Stock>
   userId: number
-  reservation: boolean
+  state: string
 }
 
 export interface DatabaseObject {
   connection: mongoose.Connection
   logger: LoggerInstance
   tokenSalt: string
+
+  alert: mongoose.Model<Alert>
+  attachment: mongoose.Model<Attachment>
   category: mongoose.Model<Category>
   order: mongoose.Model<Order>
   place: mongoose.Model<Place>
+  product_code: mongoose.Model<ProductCode>
   user: mongoose.Model<User>
 }

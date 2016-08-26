@@ -5,7 +5,7 @@ import {Place} from '../type/model.d.ts'
 import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
 import {OrderModel} from './order'
-import {ProductCodeSchema} from './product_code'
+import {StockState} from '../lib/stock_state'
 
 const modelName = 'Place'
 
@@ -19,15 +19,20 @@ export let PlaceSchema = new mongoose.Schema({
     required: true,
     trim: true,
     type: String
-  },
-  productCodeList: [ProductCodeSchema]
+  }
 })
+
+// Plugins
+PlaceSchema.plugin(autoIncr.plugin, modelName)
 
 // hooks
 PlaceSchema.pre('save', (next) => {
   let place = this
   if (!place.productCodeList) {
     place.productCodeList = []
+  }
+  if (!place.alertList) {
+    place.alertList = []
   }
   next()
 })
@@ -38,20 +43,26 @@ PlaceSchema.pre('remove', function (next: Function): void {
   OrderModel.find({ placeIdSource: this._id }).exec()
   .then((orderList1) => {
     if (orderList1.length > 0) {
-      next(new Error(errMsg))
-    } else {
-      OrderModel.find({ placeIdDestination: this._id }).exec()
-      .then((orderList2) => {
-        if (orderList2.length > 0) {
-          next(new Error(errMsg))
-        } else {
-          next()
-        }
-      }, err => next(err))
+      return next(new Error(errMsg))
     }
-  }, err => next(err))
+    OrderModel.find({ placeIdDestination: this._id }).exec()
+    .then((orderList2) => {
+      if (orderList2.length > 0) {
+        return next(new Error(errMsg))
+      }
+      next()
+    }, err => { return next(err) })
+  }, err => { return next(err) })
 })
 
-// Plugins
-PlaceSchema.plugin(autoIncr.plugin, modelName)
+PlaceSchema.methods.getStockState = async function (): Promise<Object> {
+  try {
+    let placeStockState = new StockState(this._id)
+    let stockObject = await placeStockState.toObject()
+    return stockObject
+  } catch (err) {
+    throw err
+  }
+}
+
 export let PlaceModel = mongoose.model<Place>(modelName, PlaceSchema)

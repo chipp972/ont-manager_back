@@ -5,8 +5,9 @@ import {User} from '../type/model.d.ts'
 import * as mongoose from 'mongoose'
 import * as bcrypt from 'bcryptjs'
 import * as autoIncr from 'mongoose-auto-increment'
-import {AlertSchema} from './alert'
 import {OrderModel} from './order'
+import {PlaceModel} from './place'
+import {checkRef} from './utils'
 
 const SALT = 10
 const modelName = 'User'
@@ -14,7 +15,6 @@ const modelName = 'User'
 export let UserSchema = new mongoose.Schema({
   activated: { default: false, type: Boolean },
   admin: { default: false, type: Boolean },
-  alertList: [AlertSchema],
   email: {
     index: { unique: true},
     lowercase: true,
@@ -23,10 +23,14 @@ export let UserSchema = new mongoose.Schema({
     type: String
   },
   password: { required: true, type: String }
+  // placeId: { ref: 'Place', required: true, type: Number }
 })
 
 // Plugins
 UserSchema.plugin(autoIncr.plugin, modelName)
+
+// reference validations
+// checkRef(UserSchema, 'placeId', PlaceModel)
 
 // hooks
 UserSchema.pre('save', function (next: Function): void {
@@ -54,21 +58,20 @@ UserSchema.pre('remove', function (next: Function): void {
   OrderModel.find({ userId: this._id }).exec()
   .then((documents) => {
     if (documents.length > 0) {
-      next(new Error('This user is in some orders'))
-    } else {
-      next()
+      return next(new Error('This user is in some orders'))
     }
+    return next()
   })
 })
 
 // methods
 UserSchema.methods.comparePassword =
-function (candidatePassword: string, cb: (e: Error, b: boolean) => any): any {
-  bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
-    if (err) {
-      return cb(err, false)
-    }
-    return cb(undefined, isMatch)
+function (candidatePassword: string): Promise<boolean> {
+  return new Promise<boolean>((resolve, reject) => {
+    bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
+      if (err) { reject(err) }
+      resolve(isMatch)
+    })
   })
 }
 
