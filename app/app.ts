@@ -26,64 +26,60 @@ export let initAppAndDatabase = async function (): Promise<AppPlusDatabase> {
     let logger = getLogger(config.logfile)
 
     try {
-          // database and app init
-          let app = express()
-          let database = await initDatabase()
+      // database and app init
+      let app = express()
+      let database = await initDatabase()
 
-          /* express middlewares */
+      /* express middlewares */
 
-          // security
-          app.use(helmet())
+      // security
+      app.use(helmet())
 
-          // authentication
-          app.use(passport.initialize())
-          configurePassport(database, passport)
+      // authentication
+      app.use(passport.initialize())
+      configurePassport(database, passport)
 
-          // logs
-          if (mode === 'development') { app.use(morgan('dev')) }
-          app.use(morgan(logmode, { 'stream': logger['morganStream'] }))
+      // logs
+      if (mode === 'development') { app.use(morgan('dev')) }
+      app.use(morgan(logmode, { 'stream': logger['morganStream'] }))
 
-          // requests
-          app.use(bodyParser.json())
-          app.use(bodyParser.urlencoded({ extended: false }))
+      // requests
+      app.use(bodyParser.json())
+      app.use(bodyParser.urlencoded({ extended: false }))
 
-          /* routes */
-          app.use(generateRoutes(database, logger))
+      /* routes */
+      app.use(generateRoutes(database, logger))
 
-          /* handlers */
-          // database disconnection and SIGINT handlers
-          database.connection.once('disconnected', () => {
-            logger.info('server is down')
-            process.exit(0)
-          })
-          process.once('SIGINT', () => {
-            logger.info('Server is down')
-            database.connection.close(() => {
-              process.exit(0)
-            })
-          })
+      /* handlers */
+      // database disconnection and SIGINT handlers
+      database.connection.once('disconnected', () => {
+        logger.info('server is down')
+        process.exit(0)
+      })
+      process.once('SIGINT', () => {
+        logger.info('Server is down')
+        database.connection.close(() => {
+          process.exit(0)
+        })
+      })
 
-<<<<<<< HEAD
-          // request error handler
-          app.use((err, req, res, next) => {
-            let stack: string
-            mode === 'development' ? stack = err.stack : stack = ''
+      // request error handler
+      app.use((err, req, res, next) => {
+        let stack: string
+        mode === 'development' ? stack = err.stack : stack = ''
 
-            return res.status(err['status'] || 500).json({
-              message: err.message,
-              stack: stack,
-              success: false
-            })
-          })
+        return res.status(err['status'] || 500).json({
+          message: err.message,
+          stack: stack,
+          success: false
+        })
+      })
 
-          return { app: app, database: database }
-=======
-          return {
-            app: app,
-            database: database,
-            logger: logger
-          }
->>>>>>> 3011354d1c506354f0557147a571a12ba8813bad
+      return {
+        app: app,
+        database: database,
+        logger: logger
+      }
     } catch (err) {
       logger.error(err)
       throw err

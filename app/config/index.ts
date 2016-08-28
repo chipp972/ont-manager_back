@@ -1,5 +1,5 @@
 /**
- * Function to retrieve config files
+ * @module config
  */
 import * as fs from 'fs'
 import * as path from 'path'

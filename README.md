@@ -1,4 +1,7 @@
 # Stockman API
+
+Require node v6+
+
 Restful API for back-end requests for Stockman app
 Coded in typescript
 

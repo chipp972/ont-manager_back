@@ -1,0 +1,31 @@
+{
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": ["jsdoc", "closure"]
+  },
+  "source": {
+    "exclude": [ "node_modules/" ],
+    "includePattern": ".+\\.js(doc)?$",
+    "excludePattern": "(^|\\/|\\\\)_"
+  },
+  "plugins": [],
+  "templates": {
+    "systemName": "Stockman API",
+    "copyright":  "Pierre-Charles Nicolas",
+    "includeDate": true,
+    "navType": "vertical",
+    "theme": "yeti",
+    "collapseSymbols": true,
+    "inverseNav": true,
+    "dateFormat": "dddd, MMMM Do YYYY, h:mm:ss a",
+    "sort": false,
+    "syntaxTheme": "default"
+  },
+  "opts": {
+    "encoding": "utf8",
+    "destination": "./doc/dist/",
+    "recurse": true,
+    "tutorials": "./doc/tutorials/",
+    "template": "./node_modules/ink-docstrap/template"
+  }
+}
