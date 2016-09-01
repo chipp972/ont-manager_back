@@ -4,7 +4,7 @@
   "description": "Restful API for back-end requests of stockman",
   "main": "dist/server.js",
   "scripts": {
-    "postinstall": "cp ./app/config/*.json ./dist/config/ && typings install && node ./scripts/install.js && tsc",
+    "postinstall": "typings install && node ./scripts/install.js && tsc && cp ./app/config/*.json ./dist/config/",
     "prestart": "tsc && cp ./app/config/*.json ./dist/config/",
     "start": "NODE_ENV=development nodemon dist/server.js",
     "preprod": "tsc && cp ./app/config/*.json ./dist/config/",
