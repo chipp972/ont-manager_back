@@ -3,6 +3,7 @@
     {
       "name"      : "Stockman_API",
       "script"    : "dist/server.js",
+      "cwd"       : "/home/stockman/api/current",
       "instances" : "max",
       "exec_mode" : "cluster",
       "env": {
