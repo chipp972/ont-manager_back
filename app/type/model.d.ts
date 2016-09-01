@@ -2,78 +2,83 @@
  * Contains the type informations about the database object returned
  */
 import * as mongoose from 'mongoose'
+import {LoggerInstance} from 'winston'
 
-export interface DatabaseObject {
-  connection: mongoose.Connection
-  category: mongoose.Model<mongoose.Document>
-  order: mongoose.Model<mongoose.Document>
-  place: mongoose.Model<mongoose.Document>
-  user: mongoose.Model<mongoose.Document>
-}
-
-export interface Category {
-  _id: number
+export interface Category extends mongoose.Document {
   name: string
   description?: string
-  upperCategoryId?: number
 }
 
-export interface ProductCode {
-  _id: number
+export interface ProductCode extends mongoose.Document {
   code: string
   categoryId: number
+  placeId: number
 }
 
-export interface Stock {
-  _id: number
+export interface Stock extends mongoose.Schema {
   categoryId: number
   quantity: number
   unitPrice: number
   description?: string
 }
 
-export interface File {
+export interface Attachment extends mongoose.Document {
   name: string
   contentType: string
   data: Buffer
   description?: string
+  orderId: number
 }
 
-export interface Place {
-  _id: number
-  name: string
-  address?: string
-  description?: string
-  internalStock: boolean
-  productCodeList: Array<ProductCode>
-}
-
-export interface Alert {
-  _id: number
+export interface Alert extends mongoose.Document {
   categoryId: number
   placeId: number
   threshold: number
   description?: string
 }
 
-export interface User {
-  _id: number
+export interface Place extends mongoose.Document {
+  name: string
+  address?: string
+  description?: string
+  internalStock: boolean
+
+  // methods
+  getStockState: () => Promise<Object>
+}
+
+export interface User extends mongoose.Document {
+  activated: boolean
   email: string
   password: string
   admin: boolean
-  alertList?: Array<Alert>
+
+  // methods
+  comparePassword: (password: string) => Promise<boolean>
 }
 
-export interface Order {
-  _id: number
+export interface Order extends mongoose.Document {
   date: Date
   deliveryDate?: Date
   receivedStock?: Array<Stock>
-  file?: Array<File>,
   placeIdSource: number
   placeIdDestination: number
   reference?: string
   stock?: Array<Stock>
   userId: number
-  reservation: boolean
+  state: string
+}
+
+export interface DatabaseObject {
+  connection: mongoose.Connection
+  logger: LoggerInstance
+  tokenSalt: string
+
+  alert: mongoose.Model<Alert>
+  attachment: mongoose.Model<Attachment>
+  category: mongoose.Model<Category>
+  order: mongoose.Model<Order>
+  place: mongoose.Model<Place>
+  product_code: mongoose.Model<ProductCode>
+  user: mongoose.Model<User>
 }

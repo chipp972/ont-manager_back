@@ -1,53 +1,68 @@
-import * as express from 'express'
-
 import {getServerConfig} from './config'
-import {getLogger} from 'app/lib/logger'
-import {initDatabase} from './model'
-import {generateRoutes} from './route'
+import {getLogger} from './lib/logger'
+import {initAppAndDatabase} from './app'
 
-export let initServer =
-  async function (sconf?: string, dconf?: string): Promise<express.Application> {
+initServer()
+
+/**
+ * Start the server
+ */
+async function initServer (): Promise<void> {
   try {
-    let serverConfigName = sconf || 'dev'
-    let databaseConfigName = dconf || 'dev'
+    /* config and logger init */
+    let mode: string
+    mode = process.env.NODE_ENV || 'development'
 
-    let config = await getServerConfig(serverConfigName)
+    let config = await getServerConfig(mode)
     let logger = getLogger(config.logfile)
-    let database = await initDatabase(databaseConfigName)
 
-    // routes
-    let app = express()
-    app.use(generateRoutes(app, database))
+    try {
+      let appPlusDb = await initAppAndDatabase()
+      let app = appPlusDb.app
+      app.set('port', config.port)
 
-    // starts the server
-    let server = app.listen(config.port, config.host, () => {
-      logger.info(`App listening on http://${config.host}:${config.port}`)
-    })
+      // Create HTTP server which listen on provided port
+      // and on all network interfaces.
+      let server = app.listen(config.port, config.host)
 
-    // logging events
-    server.on('request', (req: express.Request) => {
-      logger.debug(`${req.ip} -> ${req.method} ${req.url}`)
-    })
+      // Handle server errors
+      server.on('error', (err) => {
+        if (err.syscal !== 'listen') {
+          logger.error(err)
+          throw err
+        }
 
-    server.on('error', (err: Error) => {
-      logger.error(`server error: ${err}`)
-    })
+        let bind = `Port ${config.port}`
 
-    database.connection.once('disconnected', () => {
-      logger.debug('server is down')
-      process.exit(0)
-    })
-
-    process.once('SIGINT', () => {
-      logger.info('Server is down')
-      database.connection.close(() => {
-        process.exit(0)
+        switch (err.code) {
+          case 'EACCES':
+            logger.error(`${bind} requires elevated privileges`)
+            process.exit(1)
+            break
+          case 'EADDRINUSE':
+            logger.error(`${bind} is already in use`)
+            process.exit(1)
+            break
+          default:
+            logger.error(err)
+            throw err
+        }
       })
-    })
 
-    return app
+      server.on('listening', () => {
+        let addr = server.address()
+        let bind = typeof addr === 'string' ? `pipe ${addr}`
+        : `port ${addr.port}`
+        logger.info(`Server Listening on ${bind}`)
+      })
+
+    } catch (err) {
+      logger.error(err)
+      throw err
+    }
 
   } catch (err) {
+    console.log(err)
     throw err
   }
 }

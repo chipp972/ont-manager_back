@@ -1,117 +1,122 @@
-import {DatabaseObject} from 'app/type/model.d.ts'
-import {Router, Application} from 'express'
-import * as bodyParser from 'body-parser'
-import * as multer from 'multer'
+import {DatabaseObject} from '../type/model.d.ts'
+import {Router, Request, Response, NextFunction} from 'express'
 
-export function getModelRoutes(app: Application, model: DatabaseObject): Router {
-  app.use(bodyParser.json())
-  app.use(bodyParser.urlencoded({ extended: true }))
-
+export function getModelRoutes(model: DatabaseObject): Router {
   let router = Router()
-  let upload = multer()
+
+  let modelList: Array<string> = Object.keys(model).filter((e) => {
+    return (e !== 'connection' && e !== 'logger' && e !== 'tokenSalt')
+  })
 
   router.route('/') // list of models available
-  .get((request, response) => {
-    let modelList: string[] = []
-    for (let prop in model) {
-      if (model.hasOwnProperty(prop) && prop !== 'connection') {
-        modelList.push(prop)
+  .get((req: Request, res: Response, next: NextFunction) => {
+    res.status(200).json(modelList)
+  })
+
+  // param middleware to get the name of the model or 404 error
+  router.param('model', (req, res, next, modelName) => {
+    if (modelList.indexOf(modelName) === -1) {
+      let err = new Error(`No model ${modelName} found`)
+      err['status'] = 404
+      return next(err)
+    }
+    req['modelName'] = modelName
+    next()
+  })
+
+  // param middleware to retrieve the document
+  router.param('id', (req, res, next, id) => {
+    model[req['modelName']].findById(id).exec()
+    .then((obj) => {
+      if (!obj) {
+        let err = new Error(`No document with id ${id} in ${req['modelName']}`)
+        err['status'] = 404
+        return next(err)
       }
-    }
-    response.status(200).json(modelList)
+      req['model'] = obj
+      next()
+    })
+    .catch((err) => {
+      model.logger.error(err)
+      next(err)
+    })
   })
 
-  router.route('/:model') // list of documents for this model
-  .get((request, response, next) => {
-    let name = request.params['model']
-    if (model[name]) {
-      model[name].find()
-      .then((objList) => {
-        response
-        .status(200)
-        .contentType('application/json')
-        .set('Access-Control-Allow-Origin', '*')
-        .json(objList)
-      })
-      .catch(err => response.status(404).send(err))
-    } else {
-      response.status(404).send(`no ${name} model`)
-    }
+  // request handlers for get and post
+  router.route('/:model')
+  .get((req: Request, res: Response, next: NextFunction) => { // list documents
+    model[req['modelName']].find({}).exec()
+    .then((objList) => {
+      res.status(200).contentType('application/json').json(objList)
+    })
+    .catch(err => {
+      model.logger.error(err)
+      return next(err)
+    })
   })
-  .post(upload.array('files'), (request, response, next) => { // save a document
-    // note : the field name must be 'files'
-    let name = request.params['model']
-    let obj = new model[name](request.body)
-
-    if (!obj) {
-      response.status(404).send(`no ${name} model`)
-    } else {
-      obj.save()
-      .then((dbObj) => {
-        let uri = `http://${request.headers['host']}/${name}/${dbObj.id}`
-
-        response
-        .status(201)
-        .location(uri)
-        .contentType('application/json')
-        .set('Access-Control-Allow-Origin', '*')
-        .json(dbObj)
-      })
-      .catch(err => {
-        console.log(err)
-        response.status(403).send(err)
-      })
-    }
+  .post((req: Request, res: Response, next: NextFunction) => { // create
+    let obj = new model[req['modelName']](req['body'])
+    obj.save()
+    .then((dbObj) => {
+      let uri = `http://${req.headers['host']}/${req['modelName']}/${dbObj._id}`
+      model.logger.info(`create: ${dbObj}`)
+      return res.status(201).location(uri).json(dbObj)
+    })
+    .catch(err => {
+      model.logger.error(err)
+      return next(err)
+    })
   })
 
+  // request handlers for get, put, patch and delete
   router.route('/:model/:id')
-  .get((request, response, next) => { // get a specific document
-    let name = request.params['model']
-    let id = request.params['id']
-
-    model[name].findById(id)
-    .then((obj) => {
-      response
-      .status(200)
-      .contentType('application/json')
-      .set('Access-Control-Allow-Origin', '*')
-      .json(obj)
-    })
-    .catch(err => response.status(404).send(err))
+  .get((req: Request, res: Response, next: NextFunction) => {
+    res.status(200).contentType('application/json').json(req['model'])
   })
-  .put((request, response, next) => { // update the model
-    let name = request.params['model']
-    let id = request.params['id']
-    let updatedObj = request.body // accepts only json
+  .patch((req: Request, res: Response, next: NextFunction) => { // update
+    let updatedObj = req['body'] // accepts only json
+    // update object
+    for (let prop in updatedObj) {
+      req['model'][prop] = updatedObj[prop]
+    }
 
-    // update the obj in the database
-    model[name].findById(id)
-    .then((obj) => {
-      // update object
-      for (let prop in updatedObj) {
-          obj[prop] = updatedObj[prop]
-      }
-
-      // save the new object in the database and send it in the response
-      obj.save()
-      .then((newObj) => {
-        response
-        .status(200)
-        .contentType('application/json')
-        .set('Access-Control-Allow-Origin', '*')
-        .json(newObj)
-      })
-      .catch(err => response.status(500).send(err))
+    // save the new object in the database and send it in the response
+    req['model'].save()
+    .then((newObj) => {
+      model.logger.info(`update: ${newObj}`)
+      res.status(200).contentType('application/json').json(newObj)
     })
-    .catch(err => response.status(404).send(err))
+    .catch(err => {
+      model.logger.error(err)
+      return next(err)
+    })
   })
-  .delete((request, response, next) => { // delete the model
-    let name = request.params['model']
-    let id = request.params['id']
+  .put((req: Request, res: Response, next: NextFunction) => { // update
+    let updatedObj = req['body'] // accepts only json
+    // update object
+    updatedObj._id = req['model']._id
 
-    model[name].remove({ '_id': id })
-    .then(() => response.status(204).send())
-    .catch(err => response.status(500).send(err))
+    // save the new object in the database and send it in the response
+    updatedObj.save()
+    .then((newObj) => {
+      model.logger.info(`update: ${newObj}`)
+      res.status(200).contentType('application/json').json(newObj)
+    })
+    .catch(err => {
+      model.logger.error(err)
+      return next(err)
+    })
+  })
+  .delete((req: Request, res: Response, next: NextFunction) => { // delete
+    req['model'].remove().exec()
+    .then(() => {
+      model.logger.info(`remove: ${req['model']}`)
+      return res.status(200).contentType('application/json').json(req['model'])
+    })
+    .catch(err => {
+      model.logger.error(err)
+      return next(err)
+    })
   })
 
   return router

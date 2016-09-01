@@ -1,29 +1,34 @@
-import {DatabaseObject} from 'app/type/model.d.ts'
+import {DatabaseObject} from '../type/model.d.ts'
 
 import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
 
-import {getDatabaseConfig} from 'app/config'
-import {getLogger} from 'app/lib/logger'
+import {getDatabaseConfig} from '../config'
+import {getLogger} from '../lib/logger'
+
+// mongoose promise change
+// tslint:disable
+mongoose.Promise = require('bluebird')
+// tslint:enable
 
 // mongoose plugins initialization
 autoIncr.initialize(mongoose.connection) // auto increment
 
-/**
- * TODO can't do it because of fail typings definition
- * mongoose.Promise = global.Promise
- */
-
 // models
+import {AlertModel} from './alert'
+import {AttachmentModel} from './attachment'
 import {CategoryModel} from './category'
 import {PlaceModel} from './place'
+import {ProductCodeModel} from './product_code'
 import {UserModel} from './user'
 import {OrderModel} from './order'
 
-export async function initDatabase (configName: string):
-Promise<DatabaseObject> {
+export async function initDatabase (): Promise<DatabaseObject> {
   try {
-    let config = await getDatabaseConfig(configName)
+    let mode: string
+    mode = process.env.NODE_ENV || 'development'
+
+    let config = await getDatabaseConfig(mode)
     let logger = getLogger(config.logfile)
 
     let uri: string
@@ -36,10 +41,15 @@ Promise<DatabaseObject> {
         logger.info('database connection: success')
 
         resolve({
+          alert: AlertModel,
+          attachment: AttachmentModel,
           category: CategoryModel,
           connection: mongoose.connection,
+          logger: logger,
           order: OrderModel,
           place: PlaceModel,
+          product_code: ProductCodeModel,
+          tokenSalt: config.tokenSalt,
           user: UserModel
         })
       })
@@ -52,7 +62,7 @@ Promise<DatabaseObject> {
       })
 
       mongoose.connection.on('disconnected', () => {
-        logger.debug('database connection: ended')
+        logger.info('database connection: ended')
       })
     })
 

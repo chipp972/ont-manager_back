@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd "$(dirname $0)/.."
+cd "$(dirname $(readlink -f $0))/.."
 
 if [ ! -e node_modules/.bin/mocha ]
 then
@@ -9,7 +9,7 @@ then
   exit 1
 fi
 
-FILES=$(find . -name 'index.js' | grep -v node_modules | grep __tests__)
+FILES=$(find ./dist -name 'index.js' | grep -v node_modules | grep __tests__)
 
 for file in $FILES
 do

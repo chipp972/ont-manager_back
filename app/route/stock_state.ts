@@ -1,20 +1,31 @@
-import {DatabaseObject} from 'app/type/model.d.ts'
+import {DatabaseObject} from '../type/model.d.ts'
 import {StockState} from '../lib/stock_state'
-import {Router} from 'express'
+import {Router, Request, Response, NextFunction} from 'express'
 
-export function getStockStateRoutes(model: DatabaseObject): Router {
+export function getStockStateRoutes (model: DatabaseObject): Router {
   let router = Router()
 
-  router.route('/stock_state/:id') // list of models available
-  .get((request, response) => {
-    let placeId = request.params['id']
+  router.get('/', (req: Request, res: Response, next: NextFunction) => {
+    model.place.find({}).exec()
+    .then((documents) => {
+      res.status(200).json(documents.map((e) => { return e._id }))
+    }, (err) => {
+      return next(err)
+    })
+  })
 
+  // stock state for a specific place
+  router.route('/:id')
+  .get((req: Request, res: Response, next: NextFunction) => {
+    let placeId = Number(req.params['id'])
     let stockState = new StockState(placeId)
 
     stockState.toObject()
-    .then(obj => response.status(200).json(obj))
-    .catch(err => response.status(500).send(err))
-
+    .then(obj => res.status(200).json(obj))
+    .catch(err => {
+      model.logger.error(err)
+      return next(err)
+    })
   })
 
   return router

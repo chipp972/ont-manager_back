@@ -1,9 +1,6 @@
-/**
- * List of sub categories of stock
- */
+import {Category} from '../type/model.d.ts'
 import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
-import {checkRef} from './utils'
 import {OrderModel} from './order'
 
 const modelName = 'Category'
@@ -16,16 +13,11 @@ export let CategorySchema = new mongoose.Schema({
     required: true,
     trim: true,
     type: String
-  },
-  upperCategoryId: { ref: 'Category', type: Number }
+  }
 })
 
 // Plugins
 CategorySchema.plugin(autoIncr.plugin, modelName)
-export let CategoryModel = mongoose.model(modelName, CategorySchema)
-
-// validate upperCategoryId
-checkRef(CategorySchema, 'upperCategoryId', CategoryModel)
 
 // block delete of category if used in an order
 CategorySchema.pre('remove', function (next: Function): void {
@@ -35,26 +27,12 @@ CategorySchema.pre('remove', function (next: Function): void {
     for (let order of orderList) {
       for (let stock of order.get('stock')) {
         if (stock.categoryId === category._id) {
-          next(new Error('Category used in an order'))
+          return next(new Error('Category used in an order'))
         }
       }
     }
-
-    // if it's not in any order we replace it in all children category
-    CategoryModel.find({ upperCategoryId: category.upperCategoryId }).exec()
-    .then((categoryList) => {
-      let length = categoryList.length
-      let cc = 0
-      for (let c of categoryList) {
-        c.set('upperCategoryId', category.upperCategoryId)
-        c.save((err) => {
-          cc++
-          if (cc === length) {
-            next() // we can suppress
-          }
-        })
-      }
-    })
-
+    next()
   })
 })
+
+export let CategoryModel = mongoose.model<Category>(modelName, CategorySchema)

@@ -1,12 +1,9 @@
 /**
- * Function to retrieve config files
+ * @module config
  */
 import * as fs from 'fs'
 import * as path from 'path'
-import {ServerConfig, DatabaseConfig, Config} from 'app/type/config.d.ts'
-
-const configpath = 'app/config'
-// or __dirname if find a solution to put config files in dist/app/config/
+import {ServerConfig, DatabaseConfig, Config} from '../type/config.d.ts'
 
 const FILES = {
   database: 'db',
@@ -31,7 +28,7 @@ export function getDatabaseConfig (name: string): Promise<DatabaseConfig> {
  */
 function getConfigByName (file: string, name: string): Promise<any> {
   return new Promise<any>((resolve, reject) => {
-    getJSON(path.resolve(configpath, `${file}.json`))
+    getJSON(path.resolve(__dirname, `${file}.json`))
     .then((configurationList) => {
       for (let config of configurationList) {
         if (config.name === name) {

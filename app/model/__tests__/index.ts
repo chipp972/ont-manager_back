@@ -1,16 +1,17 @@
-/**
- * Starts all database tests on operations
- */
-import {DatabaseObject} from 'app/type/model.d.ts'
+import {DatabaseObject} from '../../type/model.d.ts'
 import {initDatabase} from '../index'
-import {userTest} from './userTest'
-// import {categoryTest} from './categoryTest'
-import {placeTest} from './placeTest'
-import {orderTest} from './orderTest'
+// import {userTest} from './userTest'
+import {categoryTests} from './category'
+// import {placeTest} from './placeTest'
+// import {orderTest} from './orderTest'
 
 // let database: DatabaseObject
 
-// describe('Database Test', () => {
+describe('Database Test', () => {
+
+  categoryTests()
+
+})
 //
 //   // initialize the connection to the database for the tests
 //   // beforeEach(function (done: MochaDone): void  {

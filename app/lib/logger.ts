@@ -1,18 +1,12 @@
 import {Logger, LoggerInstance, transports} from 'winston'
+import {join} from 'path'
 
 export function getLogger (file: string): LoggerInstance {
-  return new Logger({
+  let filepath = join(__dirname, `../../log/${file}`)
+
+  let logger = new Logger({
     exitOnError: false,
     transports: [
-      new transports.File({
-        colorize: true,
-        filename: file,
-        handleExceptions: true,
-        json: false,
-        level: 'silly',
-        maxFiles: 5,
-        maxsize: 5242880
-      }),
       new transports.Console({
         colorize: true,
         handleExceptions: true,
@@ -21,4 +15,27 @@ export function getLogger (file: string): LoggerInstance {
       })
     ]
   })
+
+  // second logger for all logs on files daily rotated
+  logger.add(require('winston-daily-rotate-file'), {
+    colorize: false,
+    filename: filepath,
+    handleExceptions: true,
+    json: false,
+    level: 'silly',
+    maxFiles: 10,
+    maxsize: 100000000,
+    prepend: true,
+    prettyPrint: true,
+    timestamp: function (): string { return (new Date()).toTimeString() }
+  })
+
+  // stream to pipe with morgan
+  logger['morganStream'] = {
+    write: (message): void => {
+      logger.info(message)
+    }
+  }
+
+  return logger
 }

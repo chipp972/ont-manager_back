@@ -1,6 +1,7 @@
 import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
 
+import {Alert} from '../type/model.d.ts'
 import {checkRef} from './utils'
 import {CategoryModel} from './category'
 import {PlaceModel} from './place'
@@ -25,3 +26,13 @@ checkRef(AlertSchema, 'placeId', PlaceModel)
 AlertSchema.path('threshold').validate((value, next) => {
   next(value > 0)
 }, 'Threshold inferior to 0')
+
+AlertSchema.methods.check =
+async function (): Promise<any> {
+  PlaceModel.findById(this.placeId).exec()
+  .then()
+  // calculate stockstate then
+  // check if for categoryId threshold is superior
+}
+
+export let AlertModel = mongoose.model<Alert>(modelName, AlertSchema)

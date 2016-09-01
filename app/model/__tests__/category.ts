@@ -1,24 +1,22 @@
-// import {DatabaseObject, Category} from 'app/type/model.d.ts'
-// import {CategoryModel} from '../category'
-// import {expect} from 'chai'
-//
-// let categoryMock1: Category = {
-//   _id: undefined,
-//   name: 'cable'
-// }
-//
-// let categoryMock2: Category = {
-//   _id: undefined,
-//   name: 'cable 5m'
-// }
-//
-// let categoryMock3: Category = {
-//   _id: undefined,
-//   name: 'cable 10m'
-// }
-//
-// export function categoryTest (database: DatabaseObject): void {
+import {DatabaseObject, Category} from '../..//type/model.d.ts'
+import * as chai from 'chai'
+
+let category1 = {
+  name: 'cable'
+}
+
+let category2 = {
+  name: 'ont'
+}
+
+let category3 = {
+  name: 'switch'
+}
+
+export function categoryTests (): any {
 //   describe('Category model', () => {
+
+}
 //
 //     beforeEach(function (done: MochaDone): void  {
 //       database.category.remove({}).exec()

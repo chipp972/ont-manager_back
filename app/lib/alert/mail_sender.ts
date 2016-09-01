@@ -1,4 +1,4 @@
-import {getMailConfig} from 'app/config'
+import {getMailConfig} from '../../config'
 import * as nodemailer from 'nodemailer'
 
 /**

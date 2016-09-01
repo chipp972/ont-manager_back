@@ -1,14 +1,18 @@
 [
   {
-    "name": "dev",
+    "name": "development",
     "host": "127.0.0.1",
     "port": 8001,
-    "logfile": "./log/dev-server.log"
-  },
-  {
-    "name": "prod",
+    "logfile": "dev-server.log"
+  }, {
+    "name": "production",
     "host": "0.0.0.0",
     "port": 8000,
-    "logfile": "./log/server.log"
+    "logfile": "server.log"
+  }, {
+    "name": "test",
+    "host": "127.0.0.1",
+    "port": 8002,
+    "logfile": "test-server.log"
   }
 ]
