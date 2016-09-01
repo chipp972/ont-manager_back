@@ -3,7 +3,6 @@
     {
       "name"      : "Stockman_API",
       "script"    : "dist/server.js",
-      "cwd"       : "/home/stockman/api/current",
       "instances" : "max",
       "exec_mode" : "cluster",
       "env": {
@@ -21,7 +20,7 @@
       "ref"  : "origin/master",
       "repo" : "https://github.com/chipp972/stock_manager_api.git",
       "path" : "/home/stockman/api",
-      "post-deploy" : "npm install && pm2 startOrRestart ecosystem.json --env production"
+      "post-deploy" : "pwd && echo $NODE_ENV && npm install && pm2 startOrRestart ecosystem.json --env production"
     },
     "dev" : {
       "user" : "stockman",
