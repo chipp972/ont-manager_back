@@ -10,6 +10,7 @@ export function getAuthenticationRoutes(model: DatabaseObject): Router {
   router.route('/register')
   .post((req: Request, res: Response, next: NextFunction) => {
     let newUser = new model.user({
+      activated: true,
       email: req['body'].email,
       password: req['body'].password
     })
