@@ -56,6 +56,7 @@ export function getModelRoutes(model: DatabaseObject): Router {
   })
   .post((req: Request, res: Response, next: NextFunction) => { // create
     let obj = new model[req['modelName']](req['body'])
+    console.log(req['body'])
     obj.save()
     .then((dbObj) => {
       let uri = `http://${req.headers['host']}/${req['modelName']}/${dbObj._id}`

@@ -1,17 +1,12 @@
 import {DatabaseObject} from '../../type/model.d.ts'
 import {initDatabase} from '../index'
 // import {userTest} from './userTest'
-import {categoryTests} from './category'
 // import {placeTest} from './placeTest'
 // import {orderTest} from './orderTest'
 
 // let database: DatabaseObject
 
-describe('Database Test', () => {
-
-  categoryTests()
-
-})
+describe('Database Test', () => {})
 //
 //   // initialize the connection to the database for the tests
 //   // beforeEach(function (done: MochaDone): void  {

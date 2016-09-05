@@ -17,7 +17,7 @@ autoIncr.initialize(mongoose.connection) // auto increment
 // models
 import {AlertModel} from './alert'
 import {AttachmentModel} from './attachment'
-import {CategoryModel} from './category'
+import {DeliveryModel} from './delivery'
 import {PlaceModel} from './place'
 import {ProductCodeModel} from './product_code'
 import {UserModel} from './user'
@@ -43,8 +43,8 @@ export async function initDatabase (): Promise<DatabaseObject> {
         resolve({
           alert: AlertModel,
           attachment: AttachmentModel,
-          category: CategoryModel,
           connection: mongoose.connection,
+          delivery: DeliveryModel,
           logger: logger,
           order: OrderModel,
           place: PlaceModel,

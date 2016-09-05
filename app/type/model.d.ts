@@ -4,19 +4,14 @@
 import * as mongoose from 'mongoose'
 import {LoggerInstance} from 'winston'
 
-export interface Category extends mongoose.Document {
-  name: string
-  description?: string
-}
-
 export interface ProductCode extends mongoose.Document {
   code: string
-  categoryId: number
+  description: string
   placeId: number
 }
 
 export interface Stock extends mongoose.Schema {
-  categoryId: number
+  codeId: number
   quantity: number
   unitPrice: number
   description?: string
@@ -31,7 +26,7 @@ export interface Attachment extends mongoose.Document {
 }
 
 export interface Alert extends mongoose.Document {
-  categoryId: number
+  codeId: number
   placeId: number
   threshold: number
   description?: string
@@ -59,14 +54,18 @@ export interface User extends mongoose.Document {
 
 export interface Order extends mongoose.Document {
   date: Date
-  deliveryDate?: Date
-  receivedStock?: Array<Stock>
   placeIdSource: number
   placeIdDestination: number
   reference?: string
   stock?: Array<Stock>
   userId: number
   state: string
+}
+
+export interface Delivery extends mongoose.Document {
+  date: Date,
+  orderId: number,
+  stock?: Array<Stock>
 }
 
 export interface DatabaseObject {
@@ -76,7 +75,7 @@ export interface DatabaseObject {
 
   alert: mongoose.Model<Alert>
   attachment: mongoose.Model<Attachment>
-  category: mongoose.Model<Category>
+  delivery: mongoose.Model<Delivery>
   order: mongoose.Model<Order>
   place: mongoose.Model<Place>
   product_code: mongoose.Model<ProductCode>

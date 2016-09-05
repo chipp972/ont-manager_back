@@ -14,10 +14,8 @@ let states = [ 'reservation', 'delivered', 'sending', 'partial', 'cancel' ]
 
 export let OrderSchema = new mongoose.Schema({
   date: Date,
-  deliveryDate: Date,
   placeIdDestination: { ref: 'Place', required: true, type: Number },
   placeIdSource: { ref: 'Place', required: true, type: Number },
-  receivedStock: [StockSchema],
   reference: String,
   state: { default: false, enum: states, type: String },
   stock: [StockSchema],
@@ -30,10 +28,6 @@ OrderSchema.plugin(autoIncr.plugin, modelName)
 // check if the stock required is present in the source
 OrderSchema.pre('save', function (next: Function): void {
   let order = this
-
-  if (!order.receivedStock) {
-    order.receivedStock = []
-  }
 
   PlaceModel.findOne({ _id: order.placeIdSource }).exec()
   .then((sourcePlace) => {
@@ -85,12 +79,5 @@ OrderSchema.path('reference').validate((value, next) => {
     next()
   }
 }, 'reference is not valid')
-
-/** function to compare stock and receivedStock
- * if they are the same -> []
- * else it will send an array with the stocks and the lacking quantity
- */
-// OrderSchema.methods.compareStocks =
-// function ()
 
 export let OrderModel = mongoose.model<Order>(modelName, OrderSchema)

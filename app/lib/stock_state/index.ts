@@ -3,7 +3,8 @@
  */
 import {Stock} from '../../type//model.d.ts'
 import {OrderModel} from '../../model/order'
-import {CategoryModel} from '../../model/category'
+import {ProductCodeModel} from '../../model/product_code'
+import {DeliveryModel} from '../../model/delivery'
 
 export class StockState {
   private placeId: number
@@ -21,29 +22,29 @@ export class StockState {
   }
 
   /**
-   * get a stock state object in a more human readable state with category
-   * names, unit prices for each category and quantity for each unit price
-   * @param  {number}          [categoryId] limit the result to a category
+   * get a stock state object in a more human readable state with code
+   * names, unit prices for each code and quantity for each unit price
+   * @param  {number}          [codeId] limit the result to a code
    * @return {Promise<Object>}              the new stock state
    */
-  public async toObject (categoryId?: number): Promise<Object> {
+  public async toObject (codeId?: number): Promise<Object> {
     try {
       this.state = this.state || await this.calculateStockState()
       let result: Object = {}
-      let categoryList: Array<number> = undefined
+      let codeList: Array<number> = undefined
 
       for (let prop in this.state) {
         let tmp = /(\d+)_(\d+)/.exec(prop)
         let id = tmp[1]
         let price = tmp[2]
 
-        if (! categoryList ||
-        (categoryList && categoryList.indexOf(Number(id)) !== -1)) {
+        if (! codeList ||
+        (codeList && codeList.indexOf(Number(id)) !== -1)) {
 
-          let category = await CategoryModel.findOne({ _id: id }).exec()
-          let categoryName = category.get('name')
-          result[categoryName] = result[categoryName] || {}
-          result[categoryName][price] = this.state[prop]
+          let code = await ProductCodeModel.findOne({ _id: id }).exec()
+          let codeName = code.get('description')
+          result[codeName] = result[codeName] || {}
+          result[codeName][price] = this.state[prop]
         }
       }
       return result
@@ -61,7 +62,7 @@ export class StockState {
   public async hasEnoughStock (stockList: Array<Stock>): Promise<boolean> {
     this.state = this.state || await this.calculateStockState()
     for (let stock of stockList) {
-      let key = `${stock.categoryId}_${stock.unitPrice}`
+      let key = `${stock.codeId}_${stock.unitPrice}`
       if (! this.state[key] || (this.state[key] - stock.quantity < 0)) {
         return false
       }
@@ -91,37 +92,51 @@ export class StockState {
         placeIdDestination: this.placeId
       }).exec()
 
-      for (let currOrder of orderList) {
-        for (let stock of currOrder.get('receivedStock')) {
-          let key = `${stock.get('categoryId')}_${stock.get('unitPrice')}`
-          if (stockState[key] !== undefined) {
-            stockState[key] += stock.get('quantity')
-          } else {
-            stockState[key] = stock.get('quantity')
-          }
-        }
-      }
-    } catch (err) {
-      throw err
-    }
-
-    // output then
-    try {
-      let orderList = await OrderModel.find({
+      let deliveryList = await DeliveryModel.find({
         date: { $lt: this.date },
-        placeIdSource: this.placeId
+        placeIdDestination: this.placeId
+      })
+      .populate({
+        match: { placeIdDestination: this.placeId },
+        path: 'orderId'
       }).exec()
+      deliveryList = deliveryList.filter((e) => {
+        return e['orderId'] !== undefined
+      })
 
-      for (let currOrder of orderList) {
-        for (let stock of currOrder.get('receivedStock')) {
-          let key = `${stock.get('categoryId')}_${stock.get('unitPrice')}`
-          if (stockState[key] !== undefined) {
-            stockState[key] -= stock.get('quantity')
-          } else {
-            stockState[key] = -stock.get('quantity')
-          }
-        }
-      }
+      console.log(deliveryList)
+
+    //   for (let currOrder of orderList) {
+    //     for (let stock of currOrder.get('receivedStock')) {
+    //       let key = `${stock.get('codeId')}_${stock.get('unitPrice')}`
+    //       if (stockState[key] !== undefined) {
+    //         stockState[key] += stock.get('quantity')
+    //       } else {
+    //         stockState[key] = stock.get('quantity')
+    //       }
+    //     }
+    //   }
+    // } catch (err) {
+    //   throw err
+    // }
+    //
+    // // output then
+    // try {
+    //   let orderList = await OrderModel.find({
+    //     date: { $lt: this.date },
+    //     placeIdSource: this.placeId
+    //   }).exec()
+    //
+    //   for (let currOrder of orderList) {
+    //     for (let stock of currOrder.get('receivedStock')) {
+    //       let key = `${stock.get('codeId')}_${stock.get('unitPrice')}`
+    //       if (stockState[key] !== undefined) {
+    //         stockState[key] -= stock.get('quantity')
+    //       } else {
+    //         stockState[key] = -stock.get('quantity')
+    //       }
+    //     }
+    //   }
     } catch (err) {
       throw err
     }
