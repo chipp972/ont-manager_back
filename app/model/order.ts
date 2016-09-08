@@ -70,7 +70,7 @@ OrderSchema.path('reference').validate((value, next) => {
 
   // check if it's a reservation when there is no reference
   if (! value) {
-    if (! order.reservation) {
+    if (order.state !== 'reservation') {
       next(false)
     } else {
       next(true)
