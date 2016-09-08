@@ -45,6 +45,7 @@ export function getAuthenticationRoutes(model: DatabaseObject): Router {
         let opts: jwt.SignOptions = { expiresIn: '1h' }
         let token = jwt.sign(account, model.tokenSalt, opts)
         return res.status(200).json({
+          id: account._id,
           success: true,
           token: token
         })

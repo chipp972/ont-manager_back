@@ -69,6 +69,19 @@ export function getModelRoutes(model: DatabaseObject): Router {
     })
   })
 
+  // request handlers for search filters
+  router.route('/:model/search')
+  .post((req: Request, res: Response, next: NextFunction) => {
+    model[req['modelName']].find(req['body']).exec()
+    .then((objList) => {
+      res.status(200).contentType('application/json').json(objList)
+    })
+    .catch(err => {
+      model.logger.error(err)
+      return next(err)
+    })
+  })
+
   // request handlers for get, put, patch and delete
   router.route('/:model/:id')
   .get((req: Request, res: Response, next: NextFunction) => {
