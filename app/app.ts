@@ -45,7 +45,7 @@ export let initAppAndDatabase = async function (): Promise<AppPlusDatabase> {
 
       // requests
       app.use(bodyParser.json())
-      app.use(bodyParser.urlencoded({ extended: false }))
+      app.use(bodyParser.urlencoded({ extended: true }))
 
       /* routes */
       app.use(generateRoutes(database, logger))

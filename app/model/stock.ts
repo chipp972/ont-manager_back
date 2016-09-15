@@ -7,7 +7,7 @@ import {ProductCodeModel} from './product_code'
 const modelName = 'Stock'
 
 export let StockSchema = new mongoose.Schema({
-  codeId: { ref: 'Category', type: Number },
+  codeId: { ref: 'ProductCode', type: Number },
   description: String,
   quantity: { default: 1, type: Number },
   unitPrice: { default: 0, type: Number }
