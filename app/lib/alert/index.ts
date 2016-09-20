@@ -14,17 +14,15 @@ export async function alertCheck (order: mongoose.Document): Promise<void> {
     let stockState = new StockState(placeId, order.get('date'))
     let userList = await UserModel.find({}).exec()
     for (let user of userList) {
-      for (let alert of user.get('alertList')) {
-        if (alert.placeId === placeId) {
-          stockState.toObject(alert.categoryId)
-          .then((obj) => {
-            if (obj['TOTAL'] <= alert.threshold) {
-              sendMail(user.get('email'))
-            }
-          })
-          .catch(err => console.log(err))
-        }
-      }
+      // for (let alert of user.get('alertList')) {
+      //   if (alert.placeId === placeId) {
+      //     let obj = await stockState.toObject(alert.categoryId)
+      //       if (obj['TOTAL'] <= alert.threshold) {
+      //         await sendMail(user.get('email'),
+      //           'Stock Alert', 'stock under threshol')
+      //       }
+        // }
+      // }
     }
     return
   } catch (err) {

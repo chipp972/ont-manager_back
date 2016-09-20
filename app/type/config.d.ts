@@ -15,6 +15,12 @@ export interface ServerConfig extends Config {
   port: number
 }
 
+export interface MailConfig extends Config {
+  dev_mail: string
+  api_key: string
+  domain: string
+}
+
 declare enum DatabaseType {
   'mysql', 'mongodb', 'sqlite'
 }

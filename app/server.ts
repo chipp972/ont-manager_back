@@ -27,14 +27,14 @@ async function initServer (): Promise<void> {
 
       // Handle server errors
       server.on('error', (err) => {
-        if (err.syscal !== 'listen') {
-          logger.error(err)
+        if (err['syscall'] !== 'listen') {
+          logger.error(err.message)
           throw err
         }
 
         let bind = `Port ${config.port}`
 
-        switch (err.code) {
+        switch (err['code']) {
           case 'EACCES':
             logger.error(`${bind} requires elevated privileges`)
             process.exit(1)
@@ -44,7 +44,7 @@ async function initServer (): Promise<void> {
             process.exit(1)
             break
           default:
-            logger.error(err)
+            logger.error(err.message)
             throw err
         }
       })

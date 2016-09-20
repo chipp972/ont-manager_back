@@ -1,8 +1,23 @@
 [
   {
-    "name": "mailsender",
-    "user": "stockman.auto",
-    "password": "Covage01",
-    "logfile": "../../log/mail.log"
+    "name": "production",
+    "dev_mail": "stockman.auto@gmail.com",
+    "api_key": "key-b4b35b05f4e0758ec7f60f4eb9b9b71f",
+    "domain": "sandboxbe194c0c1a6b4d8ea6cffa6de4cfd0c7.mailgun.org",
+    "logfile": "mail.log"
+  },
+  {
+    "name": "development",
+    "dev_mail": "stockman.auto@gmail.com",
+    "api_key": "key-b4b35b05f4e0758ec7f60f4eb9b9b71f",
+    "domain": "sandboxbe194c0c1a6b4d8ea6cffa6de4cfd0c7.mailgun.org",
+    "logfile": "mail.dev.log"
+  },
+  {
+    "name": "test",
+    "dev_mail": "stockman.auto@gmail.com",
+    "api_key": "key-b4b35b05f4e0758ec7f60f4eb9b9b71f",
+    "domain": "sandboxbe194c0c1a6b4d8ea6cffa6de4cfd0c7.mailgun.org",
+    "logfile": "mail.test.log"
   }
 ]

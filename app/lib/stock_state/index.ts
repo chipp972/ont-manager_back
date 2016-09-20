@@ -2,9 +2,8 @@
  * Calculate stock state
  */
 import {Stock} from '../../type//model.d.ts'
-import {OrderModel} from '../../model/order'
 import {ProductModel} from '../../model/product'
-import {DeliveryModel} from '../../model/delivery'
+import {StockModel} from '../../model/stock'
 
 export class StockState {
   private placeId: number
@@ -22,33 +21,34 @@ export class StockState {
   }
 
   /**
-   * get a stock state object in a more human readable state with code
-   * names, unit prices for each code and quantity for each unit price
-   * @param  {number}          [codeId] limit the result to a code
-   * @return {Promise<Object>}              the new stock state
+   * get a stock state object in a more human readable way
+   * @return {Promise<Array<any>>}
    */
-  public async toObject (codeId?: number): Promise<Object> {
+  public async toObject (): Promise<Object> {
     try {
       this.state = this.state || await this.calculateStockState()
-      let result: Object = {}
-      let codeList: Array<number> = undefined
+      let result = []
+      let productList = await ProductModel.find({})
+      .populate({
+        path: 'fileId'
+      }).exec()
 
       for (let prop in this.state) {
         let tmp = /(\d+)_(\d+)/.exec(prop)
-        let id = tmp[1]
-        let price = tmp[2]
+        let id = Number(tmp[1])
+        let price = Number(tmp[2])
 
-        if (! codeList ||
-        (codeList && codeList.indexOf(Number(id)) !== -1)) {
-
-          let code = await ProductModel.findOne({ _id: id }).exec()
-          let codeName = code.get('description')
-          result[codeName] = result[codeName] || {}
-          result[codeName][price] = this.state[prop]
-        }
+        let item = productList.find((e) => { return Number(e._id) === id })
+        result.push({
+          code: item.code,
+          file: item.fileId,
+          itemDescription: item.description,
+          productId: id,
+          quantity: this.state[prop],
+          unitPrice: price
+        })
       }
       return result
-
     } catch (err) {
       throw err
     }
@@ -63,7 +63,7 @@ export class StockState {
     this.state = this.state || await this.calculateStockState()
     for (let stock of stockList) {
       let key = `${stock.productId}_${stock.unitPrice}`
-      if (! this.state[key] || (this.state[key] - stock.quantity < 0)) {
+      if (!this.state[key] || (this.state[key] - stock.quantity < 0)) {
         return false
       }
     }
@@ -80,67 +80,51 @@ export class StockState {
 
   /**
    * Determine the stock of the place at a given date
-   * @return {Promise<Object>}         the stock state
+   * @return {Promise<any>}         the stock state
    */
-  private async calculateStockState (): Promise<Object> {
-    let stockState: Object = {}
-
+  private async calculateStockState (): Promise<any> {
     // input first
     try {
-      let orderList = await OrderModel.find({
-        date: { $lt: this.date },
-        placeIdDestination: this.placeId
-      }).exec()
+      let populateQuery: any = {
+        match: { date: { $lt: this.date } },
+        path: 'deliveryId',
+        populate: {
+          match: {
+            placeIdDestination: this.placeId
+          },
+          path: 'orderId'
+        }
+      }
+      let inStockList = await StockModel.find({})
+      .populate(populateQuery).exec()
 
-      let deliveryList = await DeliveryModel.find({
-        date: { $lt: this.date },
-        placeIdDestination: this.placeId
-      })
-      .populate({
-        match: { placeIdDestination: this.placeId },
-        path: 'orderId'
-      }).exec()
-      deliveryList = deliveryList.filter((e) => {
-        return e['orderId'] !== undefined
-      })
+      // then output
+      populateQuery.populate.match.placeIdSource = this.placeId
+      let outStockList = await StockModel.find({})
+      .populate(populateQuery).exec()
 
-      console.log(deliveryList)
+      // create object
+      for (let item of inStockList) {
+        let key = `${item.get('productId')}_${item.get('unitPrice')}`
+        if (this.state[key] !== undefined) {
+          this.state[key] += item.get('quantity')
+        } else {
+          this.state[key] = item.get('quantity')
+        }
+      }
 
-    //   for (let currOrder of orderList) {
-    //     for (let stock of currOrder.get('receivedStock')) {
-    //       let key = `${stock.get('codeId')}_${stock.get('unitPrice')}`
-    //       if (stockState[key] !== undefined) {
-    //         stockState[key] += stock.get('quantity')
-    //       } else {
-    //         stockState[key] = stock.get('quantity')
-    //       }
-    //     }
-    //   }
-    // } catch (err) {
-    //   throw err
-    // }
-    //
-    // // output then
-    // try {
-    //   let orderList = await OrderModel.find({
-    //     date: { $lt: this.date },
-    //     placeIdSource: this.placeId
-    //   }).exec()
-    //
-    //   for (let currOrder of orderList) {
-    //     for (let stock of currOrder.get('receivedStock')) {
-    //       let key = `${stock.get('codeId')}_${stock.get('unitPrice')}`
-    //       if (stockState[key] !== undefined) {
-    //         stockState[key] -= stock.get('quantity')
-    //       } else {
-    //         stockState[key] = -stock.get('quantity')
-    //       }
-    //     }
-    //   }
+      for (let item of outStockList) {
+        let key = `${item.get('productId')}_${item.get('unitPrice')}`
+        if (this.state[key] !== undefined) {
+          this.state[key] -= item.get('quantity')
+        } else {
+          this.state[key] = -item.get('quantity')
+        }
+      }
     } catch (err) {
       throw err
     }
 
-    return stockState
+    return this.state
   }
 }

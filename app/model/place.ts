@@ -33,7 +33,7 @@ PlaceSchema.pre('save', (next) => {
 
 // block delete if orders with this placeId remains
 PlaceSchema.pre('remove', function (next: Function): void {
-  let errMsg = 'Orders with this place remain'
+  let errMsg = 'Orders with this place remain in the database'
   OrderModel.find({ placeIdSource: this._id }).exec()
   .then((orderList1) => {
     if (orderList1.length > 0) {

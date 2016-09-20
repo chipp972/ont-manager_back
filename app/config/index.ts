@@ -3,7 +3,7 @@
  */
 import * as fs from 'fs'
 import * as path from 'path'
-import {ServerConfig, DatabaseConfig, Config} from '../type/config.d.ts'
+import {ServerConfig, DatabaseConfig, MailConfig} from '../type/config.d.ts'
 
 const FILES = {
   database: 'db',
@@ -11,7 +11,7 @@ const FILES = {
   server: 'server'
 }
 
-export function getMailConfig (name: string): Promise<Config> {
+export function getMailConfig (name: string): Promise<MailConfig> {
   return getConfigByName(FILES.mail, name)
 }
 

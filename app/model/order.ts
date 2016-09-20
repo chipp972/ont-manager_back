@@ -81,4 +81,8 @@ OrderSchema.post('save', (order, next) => {
   next()
 })
 
+OrderSchema.pre('remove', function (next: Function): void {
+  return next(new Error('Cannot delete an order; update order\'s state'))
+})
+
 export let OrderModel = mongoose.model<Order>(modelName, OrderSchema)

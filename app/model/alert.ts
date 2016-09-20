@@ -33,6 +33,7 @@ AlertSchema.path('danger').validate((value, next) => {
 
 AlertSchema.methods.check = async function (): Promise<any> {
   let place = await PlaceModel.findById(this.placeId).exec()
+  // TODO alert check
   // calculate stockstate then
   // check if for productId threshold is superior
 }
