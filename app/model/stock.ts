@@ -2,8 +2,8 @@ import * as mongoose from 'mongoose'
 import * as autoIncr from 'mongoose-auto-increment'
 
 import {Stock} from '../type/model.d.ts'
-import {checkRef} from './utils'
-import {ProductModel} from './product'
+// import {checkRef} from './utils'
+// import {ProductModel} from './product'
 import {OrderModel} from './order'
 import {DeliveryModel} from './delivery'
 
@@ -22,7 +22,7 @@ export let StockSchema = new mongoose.Schema({
 StockSchema.plugin(autoIncr.plugin, modelName)
 
 // reference validation
-checkRef(StockSchema, 'productId', ProductModel)
+// checkRef(StockSchema, 'productId', ProductModel)
 
 StockSchema.pre('save', function (next: Function): void {
   let stock = this
