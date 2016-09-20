@@ -23,13 +23,30 @@ StockSchema.plugin(autoIncr.plugin, modelName)
 
 // reference validation
 checkRef(StockSchema, 'productId', ProductModel)
-checkRef(StockSchema, 'orderId', OrderModel)
-checkRef(StockSchema, 'deliveryId', DeliveryModel)
 
 StockSchema.pre('save', function (next: Function): void {
   let stock = this
   if (!stock.orderId && !stock.deliveryId) {
     return next(new Error('Lack a reference to an order or a delivery'))
+  }
+  if (stock.orderId) {
+    OrderModel.findOne({ _id: stock.orderId }).exec()
+    .then((document) => {
+      if (!document) {
+        next(new Error('Invalid order id'))
+      } else {
+        next()
+      }
+    }, err => next(err))
+  } else {
+    DeliveryModel.findOne({ _id: stock.deliveryId }).exec()
+    .then((document) => {
+      if (!document) {
+        next(new Error('Invalid delivery id'))
+      } else {
+        next()
+      }
+    }, err => next(err))
   }
   next()
 })
