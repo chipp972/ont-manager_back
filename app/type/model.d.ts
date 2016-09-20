@@ -4,14 +4,16 @@
 import * as mongoose from 'mongoose'
 import {LoggerInstance} from 'winston'
 
-export interface ProductCode extends mongoose.Document {
+export interface Product extends mongoose.Document {
   code: string
   description: string
-  placeId: number
+  fileId?: number
 }
 
-export interface Stock extends mongoose.Schema {
-  codeId: number
+export interface Stock extends mongoose.Document {
+  orderId?: number
+  deliveryId?: number
+  productId: number
   quantity: number
   unitPrice: number
   description?: string
@@ -22,13 +24,13 @@ export interface Attachment extends mongoose.Document {
   contentType: string
   data: Buffer
   description?: string
-  orderId: number
 }
 
 export interface Alert extends mongoose.Document {
-  codeId: number
+  productId: number
   placeId: number
-  threshold: number
+  warning: number
+  danger: number
   description?: string
 }
 
@@ -47,6 +49,7 @@ export interface User extends mongoose.Document {
   email: string
   password: string
   admin: boolean
+  placeList?: Array<number> // only if admin
 
   // methods
   comparePassword: (password: string) => Promise<boolean>
@@ -57,15 +60,15 @@ export interface Order extends mongoose.Document {
   placeIdSource: number
   placeIdDestination: number
   reference?: string
-  stock?: Array<Stock>
   userId: number
   state: string
+  fileId?: number
 }
 
 export interface Delivery extends mongoose.Document {
-  date: Date,
-  orderId: number,
-  stock?: Array<Stock>
+  date: Date
+  orderId: number
+  fileId?: number
 }
 
 export interface DatabaseObject {
@@ -78,6 +81,7 @@ export interface DatabaseObject {
   delivery: mongoose.Model<Delivery>
   order: mongoose.Model<Order>
   place: mongoose.Model<Place>
-  product_code: mongoose.Model<ProductCode>
+  product: mongoose.Model<Product>
+  stock: mongoose.Model<Stock>
   user: mongoose.Model<User>
 }

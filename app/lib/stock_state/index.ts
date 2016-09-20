@@ -3,7 +3,7 @@
  */
 import {Stock} from '../../type//model.d.ts'
 import {OrderModel} from '../../model/order'
-import {ProductCodeModel} from '../../model/product_code'
+import {ProductModel} from '../../model/product'
 import {DeliveryModel} from '../../model/delivery'
 
 export class StockState {
@@ -41,7 +41,7 @@ export class StockState {
         if (! codeList ||
         (codeList && codeList.indexOf(Number(id)) !== -1)) {
 
-          let code = await ProductCodeModel.findOne({ _id: id }).exec()
+          let code = await ProductModel.findOne({ _id: id }).exec()
           let codeName = code.get('description')
           result[codeName] = result[codeName] || {}
           result[codeName][price] = this.state[prop]
@@ -62,7 +62,7 @@ export class StockState {
   public async hasEnoughStock (stockList: Array<Stock>): Promise<boolean> {
     this.state = this.state || await this.calculateStockState()
     for (let stock of stockList) {
-      let key = `${stock.codeId}_${stock.unitPrice}`
+      let key = `${stock.productId}_${stock.unitPrice}`
       if (! this.state[key] || (this.state[key] - stock.quantity < 0)) {
         return false
       }

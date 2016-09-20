@@ -27,13 +27,7 @@ PlaceSchema.plugin(autoIncr.plugin, modelName)
 
 // hooks
 PlaceSchema.pre('save', (next) => {
-  let place = this
-  if (!place.productCodeList) {
-    place.productCodeList = []
-  }
-  if (!place.alertList) {
-    place.alertList = []
-  }
+  // let place = this
   next()
 })
 

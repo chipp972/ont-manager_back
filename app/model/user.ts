@@ -6,8 +6,6 @@ import * as mongoose from 'mongoose'
 import * as bcrypt from 'bcryptjs'
 import * as autoIncr from 'mongoose-auto-increment'
 import {OrderModel} from './order'
-import {PlaceModel} from './place'
-import {checkRef} from './utils'
 
 const SALT = 10
 const modelName = 'User'
@@ -22,19 +20,25 @@ export let UserSchema = new mongoose.Schema({
     trim: true,
     type: String
   },
-  password: { required: true, type: String }
-  // placeId: { ref: 'Place', required: true, type: Number }
+  password: { required: true, type: String },
+  placeList: [{ ref: 'Place', type: Number }]
 })
 
 // Plugins
 UserSchema.plugin(autoIncr.plugin, modelName)
 
-// reference validations
-// checkRef(UserSchema, 'placeId', PlaceModel)
-
 // hooks
 UserSchema.pre('save', function (next: Function): void {
   let user = this
+
+  // check if admin (no place needed)
+  if (!user.admin && !user.placeList) {
+    return next(new Error('palceList field needed'))
+  } else if (!user.admin && user.placeList.length === 0) {
+    return next(new Error('palceList field needed'))
+  }
+
+  // TODO validate placeList ids
 
   // only hash the password if it has been modified or is new
   if (user.isModified('password') || user.isNew) {

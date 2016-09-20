@@ -9,18 +9,29 @@ export function getAuthenticationRoutes(model: DatabaseObject): Router {
   // route to add new accounts (not activated)
   router.route('/register')
   .post((req: Request, res: Response, next: NextFunction) => {
-    let newUser = new model.user({
-      activated: true,
-      email: req['body'].email,
-      password: req['body'].password
-    })
-    newUser.save()
-    .then((account) => {
-      model.logger.info(`create: ${account}`)
-      res.status(201).json(account)
+    // check if first user
+    model.user.find({}).exec()
+    .then((users) => {
+      let newUser = {
+        email: req['body'].email,
+        password: req['body'].password,
+        placeList: req['body'].placeList
+      }
+      if (users.length === 0) {
+        newUser['activated'] = true
+        newUser['admin'] = true
+      }
+      model.user.create(newUser, (err, user) => {
+        if (err) {
+          model.logger.error(err)
+          next(err)
+        }
+        model.logger.info(`create: ${user}`)
+        res.status(201).json(user)
+      })
     }, (err) => {
       model.logger.error(err)
-      return next(err)
+      next(err)
     })
   })
 

@@ -19,9 +19,10 @@ import {AlertModel} from './alert'
 import {AttachmentModel} from './attachment'
 import {DeliveryModel} from './delivery'
 import {PlaceModel} from './place'
-import {ProductCodeModel} from './product_code'
+import {ProductModel} from './product'
 import {UserModel} from './user'
 import {OrderModel} from './order'
+import {StockModel} from './stock'
 
 export async function initDatabase (): Promise<DatabaseObject> {
   try {
@@ -48,7 +49,8 @@ export async function initDatabase (): Promise<DatabaseObject> {
           logger: logger,
           order: OrderModel,
           place: PlaceModel,
-          product_code: ProductCodeModel,
+          product: ProductModel,
+          stock: StockModel,
           tokenSalt: config.tokenSalt,
           user: UserModel
         })
