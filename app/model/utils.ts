@@ -13,7 +13,7 @@ import * as mongoose from 'mongoose'
 export function checkRef (schema: mongoose.Schema, idField: string,
 model: mongoose.Model<mongoose.Document>): void {
   schema.path(idField).validate((value, next) => {
-    model.findOne({ _id: value }).exec()
+    model.findById(value).exec()
     .then((document) => {
       if (!document) {
         next(false)

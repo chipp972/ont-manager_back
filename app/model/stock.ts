@@ -30,21 +30,17 @@ StockSchema.pre('save', function (next: Function): void {
     return next(new Error('Lack a reference to an order or a delivery'))
   }
   if (stock.orderId) {
-    OrderModel.findOne({ _id: stock.orderId }).exec()
+    OrderModel.findById(stock.orderId).exec()
     .then((document) => {
       if (!document) {
         next(new Error('Invalid order id'))
-      } else {
-        next()
       }
     }, err => next(err))
   } else {
-    DeliveryModel.findOne({ _id: stock.deliveryId }).exec()
+    DeliveryModel.findById(stock.deliveryId).exec()
     .then((document) => {
       if (!document) {
         next(new Error('Invalid delivery id'))
-      } else {
-        next()
       }
     }, err => next(err))
   }
