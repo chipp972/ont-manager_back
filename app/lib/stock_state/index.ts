@@ -67,9 +67,8 @@ export class StockState {
         } else {
           result[key] = item.get('quantity')
         }
-
-        return this.toObject(result)
       }
+      return this.toObject(result)
     } catch (err) {
       throw err
     }
@@ -127,18 +126,26 @@ export class StockState {
           path: 'orderId'
         }
       }
-      let inStockList = await StockModel.find({})
+      let inStockList = await StockModel.find({ deliveryId : { $ne: null } })
       .populate(populateQuery).exec()
 
       // then output
       populateQuery.populate.match.placeIdSource = this.placeId
-      let outStockList = await StockModel.find({})
+      let outStockList = await StockModel.find({ deliveryId : { $ne: null } })
       .populate(populateQuery).exec()
+
+      inStockList = inStockList
+      .filter((e) => { return e.deliveryId != null })
+      .filter((e) => { return e.deliveryId['orderId'] != null })
+
+      outStockList = outStockList
+      .filter((e) => { return e.deliveryId != null })
+      .filter((e) => { return e.deliveryId['orderId'] != null })
 
       // create object
       for (let item of inStockList) {
         let key = `${item.get('productId')}_${item.get('unitPrice')}`
-        if (this.state[key] !== undefined) {
+        if (this.state[key] !== null) {
           this.state[key] += item.get('quantity')
         } else {
           this.state[key] = item.get('quantity')

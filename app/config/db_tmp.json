@@ -1,0 +1,9 @@
+{
+ "name": "development",
+ "host": "127.0.0.1",
+ "port": 27017,
+ "database": "dev_stock_manager",
+ "type": "mongodb",
+ "logfile": "dev-db.log",
+ "tokenSalt": "covageDev"
+}
