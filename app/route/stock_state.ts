@@ -9,7 +9,7 @@ export function getStockStateRoutes (model: DatabaseObject): Router {
     res.status(200).json(['state', 'waiting'])
   })
 
-  router.route(/\/[state|waiting]/)
+  router.route(/\/(state|waiting)\/?$/)
   .get((req: Request, res: Response, next: NextFunction) => {
     model.place.find({}).exec()
     .then((places) => {
