@@ -85,3 +85,12 @@ export interface DatabaseObject {
   stock: mongoose.Model<Stock>
   user: mongoose.Model<User>
 }
+
+export interface StockStateObject {
+  code: string,
+  file: any,
+  itemDescription: string,
+  productId: number,
+  quantity: number,
+  unitPrice: number
+}
