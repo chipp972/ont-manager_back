@@ -28,7 +28,7 @@ StockSchema.pre('save', function (next: Function): void {
     OrderModel.findById(stock.orderId).exec()
     .then((order) => {
       if (!order) {
-        next(new Error('Invalid orderId'))
+        return next(new Error('Invalid orderId'))
       }
       next()
     }, err => next(err))
@@ -36,7 +36,7 @@ StockSchema.pre('save', function (next: Function): void {
     DeliveryModel.findById(stock.deliveryId).exec()
     .then((delivery) => {
       if (!delivery) {
-        next(new Error('Invalid deliveryId'))
+        return next(new Error('Invalid deliveryId'))
       }
       // TODO check if all stocks from the deliveries of the corresponding order
       // + this one is equal or inferior to the stocks of the order
@@ -44,8 +44,9 @@ StockSchema.pre('save', function (next: Function): void {
       // change it to "partial". If it's superior return an error
       next()
     }, err => next(err))
+  } else {
+    return next(new Error('The stock cannot be for a delivery and an order'))
   }
-  next(new Error('The stock cannot be for a delivery and an order'))
 })
 
 export let StockModel = mongoose.model<Stock>(modelName, StockSchema)
