@@ -91,6 +91,7 @@ export function getModelRoutes(model: DatabaseObject): Router {
   .patch((req: Request, res: Response, next: NextFunction) => { // update
     let updatedObj = req['body'] // accepts only json
     // update object
+    model.logger.info('patch')
     model.logger.info(req['body'])
     for (let prop in updatedObj) {
       req['model'][prop] = updatedObj[prop]

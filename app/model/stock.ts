@@ -21,6 +21,7 @@ StockSchema.plugin(autoIncr.plugin, modelName)
 
 StockSchema.pre('save', function (next: Function): void {
   let stock = this
+  console.log(stock)
   if (!stock.orderId && !stock.deliveryId) {
     return next(new Error('Lack a reference to an order or a delivery'))
   }
