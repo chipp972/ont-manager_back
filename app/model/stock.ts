@@ -21,11 +21,10 @@ StockSchema.plugin(autoIncr.plugin, modelName)
 
 StockSchema.pre('save', function (next: Function): void {
   let stock = this
-  console.log(stock)
   if (!stock.orderId && !stock.deliveryId) {
     return next(new Error('Lack a reference to an order or a delivery'))
   }
-  if (stock.orderId && !stock.deliveryId) {
+  if (stock.orderId && stock.deliveryId == undefined) {
     OrderModel.findById(stock.orderId).exec()
     .then((order) => {
       if (!order) {
@@ -33,7 +32,7 @@ StockSchema.pre('save', function (next: Function): void {
       }
       next()
     }, err => next(err))
-  } else if (stock.deliveryId && !stock.orderId) {
+  } else if (stock.deliveryId && stock.orderId == undefined) {
     DeliveryModel.findById(stock.deliveryId).exec()
     .then((delivery) => {
       if (!delivery) {
